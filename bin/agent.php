@@ -32,6 +32,8 @@ $httpClient->setClient($client);
 
 $httpClient->sendData($data);
 
+echo "Data sent: " . PHP_EOL;
+echo json_encode($data, JSON_PRETTY_PRINT) . PHP_EOL;
+
 // Success!
-echo "Data sent successfully" . PHP_EOL;
 exit(0);

@@ -2,7 +2,7 @@
 
 namespace Studio24\Agent\Exception;
 
-class InvalidDataException extends \Exception
+class CommandException extends \Exception
 {
 
 }
