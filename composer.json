@@ -4,7 +4,7 @@
     "type": "library",
     "license": "MIT",
     "require": {
-        "php": ">=5.6",
+        "php": ">=5.5",
         "guzzlehttp/guzzle": "~6.0"
     },
     "autoload": {
@@ -12,9 +12,39 @@
             "Studio24\\Agent\\": "src/"
         }
     },
+    "require-dev": {
+        "overtrue/phplint": "^3.0",
+        "roave/security-advisories": "dev-latest",
+        "squizlabs/php_codesniffer": "^3.5",
+        "yoast/phpunit-polyfills": "^1.0"
+    },
     "scripts": {
         "post-install-cmd": [
             "php -r \"copy('config/agent-config.php', 'agent-config.php');\""
+        ],
+        "lint": [
+            "./vendor/bin/phplint"
+        ],
+        "cs":  [
+            "./vendor/bin/phpcs"
+        ],
+        "fix":  [
+            "./vendor/bin/phpcbf"
+        ],
+        "unit": [
+            "./vendor/bin/phpunit"
+        ],
+        "test": [
+            "composer lint",
+            "composer cs",
+            "composer unit"
         ]
+    },
+    "scripts-descriptions": {
+        "lint": "Lint PHP files",
+        "cs": "Test coding standards are met in PHP code",
+        "fix": "Fix PHP code so it meets coding standards",
+        "unit": "Run PHPUnit tests",
+        "test": "Run all tests (phplint, phpcs, phpunit)"
     }
 }

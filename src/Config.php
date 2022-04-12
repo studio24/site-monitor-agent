@@ -132,5 +132,4 @@ class Config
     {
         return $this->get($name);
     }
-
 }

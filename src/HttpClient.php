@@ -54,5 +54,4 @@ class HttpClient
             throw new FailedHttpRequestException(sprintf('Failed to send HTTP request, error %s', $response->getStatusCode() . ' ' . $response->getReasonPhrase()));
         }
     }
-
 }

@@ -52,5 +52,4 @@ class CommandRunner
     {
         return $this->output;
     }
-
 }
