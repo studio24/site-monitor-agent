@@ -7,6 +7,12 @@ use Studio24\Agent\Collector\Php;
 
 class PhpTest extends TestCase
 {
+    public function testName()
+    {
+        $php = new Php();
+        $this->assertEquals('PHP', $php->getName());
+    }
+
     public function testPhpVersion()
     {
         $version = phpversion();

@@ -7,6 +7,7 @@ namespace Studio24\Agent;
  */
 class Cli
 {
+    const ARGUMENT_SPACING = 23;
     public $red   = "\033[31m";
     public $green = "\033[32m";
     public $clear = "\033[0m";
@@ -54,7 +55,13 @@ class Cli
         echo $this->clear;
     }
 
-    public function help($description, $usage, $arguments)
+    /**
+     * @param string $description Help description
+     * @param string $usage Usage text
+     * @param array $arguments Array of arguments and description
+     * @param bool $exit Whether to exit after displaying help text
+     */
+    public function help($description, $usage, $arguments, $exit = true)
     {
         if (!isset($this->argv[1]) || !in_array($this->argv[1], array('--help', '-help', '-h', '-?'))) {
             return;
@@ -63,7 +70,7 @@ class Cli
         $usage = '  ' . $usage;
         $argumentsText = '';
         foreach ($arguments as $key => $value) {
-            $argumentsText = '  ' . $key . str_pad('', 23 - strlen($key), ' ') . $value;
+            $argumentsText = '  ' . $key . str_pad('', self::ARGUMENT_SPACING - strlen($key), ' ') . $value;
         }
         echo <<<EOD
 $description
@@ -76,7 +83,9 @@ $argumentsText
 
 EOD;
 
-        exit(0);
+        if ($exit) {
+            exit(0);
+        }
     }
 
     /**
