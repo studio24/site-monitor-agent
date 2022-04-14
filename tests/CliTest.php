@@ -58,5 +58,4 @@ class CliTest extends TestCase
         $this->assertEquals('testing', $cli->getArgument(1));
         $this->assertNull($cli->getArgument(2));
     }
-
 }
