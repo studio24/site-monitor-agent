@@ -4,9 +4,13 @@ namespace Tests;
 
 use PHPUnit\Framework\TestCase;
 use Studio24\Agent\Cli;
+use Yoast\PHPUnitPolyfills\Polyfills\AssertStringContains;
 
 class CliTest extends TestCase
 {
+    /** @link https://github.com/Yoast/PHPUnit-Polyfills */
+    use AssertStringContains;
+
     public function testTitle()
     {
         ob_start();

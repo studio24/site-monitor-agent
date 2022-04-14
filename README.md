@@ -9,4 +9,17 @@ See https://github.com/studio24/site-monitor
 
 ## Tests
 
-Run all tests via `composer test`, this uses [PHPUnit polyfills](https://github.com/Yoast/PHPUnit-Polyfills) to help run PHPUnit tests on PHP 5.5 to 8
+Run all tests (PHPUnit, PHP lint, phpcs) via:
+
+```
+composer test
+```
+
+Run PHPUnit tests via:
+
+```
+composer unit
+```
+
+This uses [PHPUnit polyfills](https://github.com/Yoast/PHPUnit-Polyfills) to help run PHPUnit tests on PHP 5.5 to 8. You 
+can see an example of this in [CliTest.php](tests/CliTest.php) (see the `AssertStringContains` trait).
