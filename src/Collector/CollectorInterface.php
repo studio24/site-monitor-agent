@@ -2,6 +2,9 @@
 
 namespace Studio24\Agent\Collector;
 
+/**
+ * Base data collector interface
+ */
 interface CollectorInterface
 {
     /**
@@ -15,4 +18,5 @@ interface CollectorInterface
      * @return array
      */
     public function collectData();
+
 }

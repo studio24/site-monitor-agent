@@ -11,12 +11,32 @@ use Studio24\Agent\Config;
 use Studio24\Agent\HttpClient;
 
 $cli = new Cli($argc, $argv, 'Site monitor agent');
-$cli->help('Collects data from a website or web application and sends this to a central server.', 'php agent.php [<send>]', [
-    'send' => 'Send data to API endpoint, if this argument is not set then no data is sent'
-]);
+
+// Run help command
+if (isset($argv[1]) && in_array($argv[1], ['--help', '-help', '-h', '-?'])) {
+    $cli->help('Collects data from a website or web application and sends this to a central server. Run without any arguments to collect data and output to terminal (dry run mode: no data is sent).', 'php agent.php [<send>]', [
+        'send' => 'Send data to API endpoint, if this argument is not set then no data is sent',
+        'setup' => 'Copy example config file to project',
+        '-v' => 'Verbose mode',
+        '--help' => 'This help text',
+    ]);
+    exit(0);
+}
+
+// Verbose mode?
+$verbose = false;
+if (isset($argv[1]) && in_array('-v', $argv)) {
+    $verbose = true;
+    Cli::info('Verbose mode');
+}
 
 $action = $cli->getArgument(1);
 switch ($action) {
+    case 'setup':
+        // Run setup command
+        $cli->setup();
+        exit(0);
+        break;
     case 'send':
         $send = true;
         break;
@@ -24,7 +44,9 @@ switch ($action) {
         $send = false;
 }
 
+// Run collect data command
 $config = new Config();
+$config->setVerbose($verbose);
 $config->validate();
 
 echo sprintf("Collecting data for site ID %s", $config->siteId) . PHP_EOL;
@@ -35,7 +57,9 @@ if ($send) {
 }
 
 // Setup agent
-$agent = new Agent($config->collectors);
+$agent = new Agent();
+$agent->setVerbose($verbose);
+$agent->setCollectors($config->collectors);
 $agent->setSiteId($config->siteId);
 $agent->setEnvironment($config->environment);
 $agent->setGitRepoUrl($config->gitRepoUrl);

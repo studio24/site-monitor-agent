@@ -8,9 +8,9 @@ namespace Studio24\Agent;
 class Cli
 {
     const ARGUMENT_SPACING = 23;
-    public $red   = "\033[31m";
-    public $green = "\033[32m";
-    public $clear = "\033[0m";
+    const RED   = "\033[31m";
+    const GREEN = "\033[32m";
+    const CLEAR = "\033[0m";
 
     /** @var int int */
     public $argc = 0;
@@ -36,56 +36,84 @@ class Cli
         $this->argv = $argv;
 
         if (!empty($title)) {
-            $this->title($title);
+            self::title($title);
         }
     }
 
-    public function title($title)
+    public static function title($title)
     {
-        echo $this->green;
+        echo self::GREEN;
         echo $title . PHP_EOL;
         echo str_pad('', strlen($title), '=') . PHP_EOL . PHP_EOL;
-        echo $this->clear;
+        echo self::CLEAR;
     }
 
-    public function error($message)
+    public static function info($message)
     {
-        echo $this->red;
         echo $message . PHP_EOL;
-        echo $this->clear;
+    }
+
+
+    public static function error($message)
+    {
+        echo self::RED;
+        echo $message . PHP_EOL;
+        echo self::CLEAR;
     }
 
     /**
+     * Help command
      * @param string $description Help description
      * @param string $usage Usage text
      * @param array $arguments Array of arguments and description
      * @param bool $exit Whether to exit after displaying help text
      */
-    public function help($description, $usage, $arguments, $exit = true)
+    public function help($description, $usage, $arguments)
     {
-        if (!isset($this->argv[1]) || !in_array($this->argv[1], array('--help', '-help', '-h', '-?'))) {
-            return;
-        }
-
         $usage = '  ' . $usage;
         $argumentsText = '';
         foreach ($arguments as $key => $value) {
-            $argumentsText = '  ' . $key . str_pad('', self::ARGUMENT_SPACING - strlen($key), ' ') . $value;
+            $argumentsText .= '  ' . $key . str_pad('', self::ARGUMENT_SPACING - strlen($key), ' ') . $value . PHP_EOL;
         }
+        $green = self::GREEN;
+        $clear = self::CLEAR;
         echo <<<EOD
 $description
 
-{$this->green}Usage:{$this->clear}
+{$green}Usage:{$clear}
 $usage
 
-{$this->green}Arguments:{$this->clear}
+{$green}Arguments:{$clear}
 $argumentsText
 
 EOD;
 
-        if ($exit) {
-            exit(0);
+    }
+
+    /**
+     * Setup command
+     */
+    public function setup()
+    {
+        $from = __DIR__ . '/../config/agent-config.php';
+        $to = getcwd() . '/agent-config.php';
+
+        if (!file_exists($from)) {
+            self::error("Example config file not found at $from");
+            exit(1);
         }
+        if (file_exists($to)) {
+            self::error("Config file already exists at $to");
+            exit(1);
+        }
+        if (!copy($from, $to)) {
+            self::error("Cannot copy example config file to $to");
+            exit(1);
+        }
+        echo <<<EOD
+{$this->green}Example config file copied to $to{$this->clear}
+
+EOD;
     }
 
     /**

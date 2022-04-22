@@ -2,10 +2,13 @@
 
 namespace Studio24\Agent;
 
+use Studio24\Agent\Collector\VerboseTrait;
 use Studio24\Agent\Exception\InvalidConfigException;
 
 class Config
 {
+    use VerboseTrait;
+
     const CONFIG_FILENAME = 'agent-config.php';
 
     /** @var array */
@@ -20,9 +23,10 @@ class Config
 
     /** @var string[] */
     private $paths = [
-        '../../../../',
+        './',
         '../',
         '../config/',
+        '../../../../',
     ];
 
     /** @var string */
@@ -83,11 +87,16 @@ class Config
 
         $tried = [];
         foreach ($this->paths as $path) {
-            $filepath = __DIR__ . '/' . trim($path, '/') . '/' . self::CONFIG_FILENAME;
-            if (file_exists($filepath)) {
+            $filepath = getcwd() . '/' . trim($path, '/') . '/' . self::CONFIG_FILENAME;
+            $filepath = realpath($filepath);
+            if ($filepath !== false && file_exists($filepath)) {
                 $this->config = include($filepath);
                 if (!is_array($this->config)) {
                     throw new InvalidConfigException('Config file must only return an array');
+                }
+
+                if ($this->isVerbose()) {
+                    Cli::info("Config file loaded from $filepath");
                 }
             }
             $tried[] = $filepath;

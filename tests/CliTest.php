@@ -22,7 +22,7 @@ class CliTest extends TestCase
         $this->assertStringContainsString('My name', $output);
 
         ob_start();
-        $cli->title('My new title');
+        Cli::title('My new title');
         $output = ob_get_clean();
         $this->assertStringContainsString('My new title', $output);
     }
@@ -31,7 +31,7 @@ class CliTest extends TestCase
     {
         $cli = new Cli(0, []);
         ob_start();
-        $cli->error('My error message');
+        Cli::error('My error message');
         $output = ob_get_clean();
         $this->assertStringContainsString('My error message', $output);
     }
