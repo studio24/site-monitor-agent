@@ -25,6 +25,11 @@ class Agent
             throw new \InvalidArgumentException('$collectors argument must be an array');
         }
         foreach ($collectors as $collector) {
+            if (!($collector instanceof CollectorInterface)) {
+                Cli::error(sprintf("Data collector %s must implement Studio24\Agent\Collector\CollectorInterface", get_class($collector)));
+                // @todo report error?
+                continue;
+            }
             if ($collector instanceOf VerboseInterface) {
                 $collector->setVerbose($this->isVerbose());
             }
