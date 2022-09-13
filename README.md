@@ -1,84 +1,49 @@
 # Site monitor agent
-Agent to send data to Studio 24 site monitoring tool
+Agent to send data to the [Studio 24 site monitoring tool](https://github.com/studio24/site-monitor).
 
-See https://github.com/studio24/site-monitor
+See [documentation](docs/README.md).
 
-## Requirements:
-* PHP 5.5+
-* [Guzzle 6](https://docs.guzzlephp.org/en/6.5/)
+## Requirements
+* PHP 5.5 to 8.1
+* [Composer](https://getcomposer.org/)
 
 ## Installation
 
-### Composer
-Install via local copy of site-monitor-agent (use this during development):
-
-Set the following to your composer.json with url pointing to your local install of site-monitor-agent:
-
-```json
-{
-  "minimum-stability": "dev",
-  "prefer-stable": true,
-  "repositories": [
-    {
-      "type": "path",
-      "url": "../../studio24/site-monitor-agent/"
-    }
-  ]
-}
-```
-
-Install via Composer:
-
-```
-composer require studio24/site-monitor-agent
-```
-
-### Config file
-
-The config file `agent-config.php` should be copied to your project base folder when you install the Composer 
-package. You can alter config settings here.
-
-Copy example config file to your project:
-
-```
-./vendor/bin/agent.php setup
-```
-
-Config settings: TODO
+See [installation](docs/installation.md).
 
 ## Usage
 
-Return help information:
+Collect data and run in dry-run mode (outputs data to send, but does not send any data to the API endpoint):
 
-```
-php ./vendor/bin/agent.php --help
-```
-
-Collect data and output to terminal (does not send any data):
-
-```
+```bash
 php ./vendor/bin/agent.php 
 ```
 
-Send data to API endpoint:
+Collect data and send to API endpoint:
 
-```
+```bash
 php ./vendor/bin/agent.php send
 ```
 
-## Tests
+See [usage](docs/usage.md) for more details.
 
-Run all tests (PHPUnit, PHP lint, phpcs) via:
+## Contributing
 
-```
-composer test
-```
+See [contributing](docs/contributing.md).
 
-Run PHPUnit tests via:
+## Use cases
 
-```
-composer unit
-```
+We expect to use this to collect data on things like:
 
-This uses [PHPUnit polyfills](https://github.com/Yoast/PHPUnit-Polyfills) to help run PHPUnit tests on PHP 5.5 to 8. You 
-can see an example of this in [CliTest.php](tests/CliTest.php) (see the `AssertStringContains` trait).
+* PHP version
+* WordPress version, plugin versions
+* Drupal version
+* Craft CMS version
+* Laravel version
+* Composer packages?
+* Node version
+* SSL certificates
+
+## Credits
+- **Simon R Jones** - *Lead Developer* - Studio 24
+- **Gareth Trinkwon** - *Developer* - Studio 24
