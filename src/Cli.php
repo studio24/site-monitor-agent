@@ -110,8 +110,30 @@ EOD;
             self::error("Cannot copy example config file to $to");
             exit(1);
         }
+        $green = self::GREEN;
+        $clear = self::CLEAR;
         echo <<<EOD
-{$this->green}Example config file copied to $to{$this->clear}
+{$green}Example config file copied to $to{$clear}
+
+EOD;
+
+        $from = __DIR__ . '/../config/.env';
+        $to = getcwd() . '/.env';
+
+        if (!file_exists($from)) {
+            self::error("Example .env file not found at $from");
+            exit(1);
+        }
+        if (file_exists($to)) {
+            self::error(".env file already exists at $to");
+            exit(1);
+        }
+        if (!copy($from, $to)) {
+            self::error("Cannot copy example .env file to $to");
+            exit(1);
+        }
+        echo <<<EOD
+{$green}Example .env file copied to $to{$clear}
 
 EOD;
     }

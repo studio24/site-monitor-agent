@@ -95,6 +95,8 @@ class Config
                     throw new InvalidConfigException('Config file must only return an array');
                 }
 
+                $this->config = $this->parseTokens(dirname($filepath), $this->config);
+
                 if ($this->isVerbose()) {
                     Cli::info("Config file loaded from $filepath");
                 }
@@ -108,6 +110,50 @@ class Config
             throw new InvalidConfigException('Cannot load config file or config array is empty');
         }
     }
+
+    /**
+     * Parse any tokens in a config data array and return the parsed data array
+     *
+     * @param string $path Path to load .env file from
+     * @param array $data Data array
+     * @return array Parsed data array
+     */
+    public function parseTokens($path, $data)
+    {
+        // Load .env file
+        $envPath = $path . DIRECTORY_SEPARATOR . '.env';
+        $envFile = false;
+        if (file_exists($envPath)) {
+            $envFile = file_get_contents($envPath);
+            if ($envFile === false) {
+                Cli::error('Cannot load .env file from ' . $envPath);
+            }
+        } else {
+            Cli::error('Not exists .env file from ' . $envPath);
+        }
+
+        foreach ($data as $name => $value) {
+            if (preg_match('/^%(.+)%$/', $value, $m)) {
+                $token = $m[1];
+
+                // Check environment variable
+                $env = getenv($token);
+                if ($env !== false) {
+                    $data[$name] = $env;
+                    continue;
+                }
+
+                // Check .env file
+                if ($envFile !== false) {
+                    if (preg_match('/^' . $token . '=(.+)$/m', $envFile, $m)) {
+                        $data[$name] = trim($m[1]);
+                    }
+                }
+            }
+        }
+        return $data;
+    }
+
 
     /**
      * @param $name
