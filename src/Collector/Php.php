@@ -20,7 +20,8 @@ class Php implements CollectorInterface
     public function collectData()
     {
         return [
-            'version' => phpversion()
+            'version' => phpversion(),
+            'extensions' => get_loaded_extensions()
         ];
     }
 }
