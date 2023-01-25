@@ -18,9 +18,8 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
 
     /** @var string[]  */
     private $wordPressPluginPaths = [
-        'web/wp-content/plugins',
-        'web/content/plugins',
-        'htdocs/content/plugins',
+        'wp-content/plugins',
+        'content/plugins',
     ];
 
     /** @var string */
@@ -133,16 +132,48 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
         return $this->wordPressVersion;
     }
 
-    public function getPluginVersions()
+    public function getPlugins()
     {
-//        $plugins = \get_plugins();var_dump($plugins);
+        $plugins = [];
 
-        if (defined('WP_PLUGIN_DIR')) {
-            $pluginDirectory = WP_PLUGIN_DIR;
+
+        foreach ($this->wordPressPluginPaths as $path) {
+
+            if (!file_exists($this->wordPressBasePath . '/' . $path)) {
+                continue;
+            }
+            
+            $plugin_root_files = glob($this->wordPressBasePath . '/' . $plugin_dir . '/wp-content/plugins/*/*.php');
+
+            if (is_array($plugin_root_files)) {
+
+                foreach ($plugin_root_files as $file) {
+
+                    $contents = file_get_contents($file);
+
+                    if (preg_match('/Plugin Name: *(.+)/', $contents, $m) && !empty($m[1])) {
+
+                        $name = trim($m[1]);
+                        
+                        preg_match('/Version: *(.+)/',$contents, $m);
+                        
+                        if (!empty($m[1])) {
+                            $version = trim($m[1]);
+                        } else {
+                            $version = 'N/A';
+                        }
+
+                        if ($name && $version) {
+                            $plugins[$name] = $version;
+                        }
+
+                    }
+
+                }
+            }
         }
 
-        //
-        return [];
+        return $plugins;
     }
 
     /**
@@ -155,7 +186,7 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
 
         return [
             'version' => $this->getWordPressVersion(),
-            'plugins' => $this->getPluginVersions()
+            'plugins' => $this->getPlugins()
         ];
     }
 }
