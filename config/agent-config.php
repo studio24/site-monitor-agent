@@ -8,6 +8,9 @@ return [
     'siteId'        => 'EXAMPLE',
     'environment'   => '%ENVIRONMENT%',
     'gitRepoUrl'    => 'https://github.com/studio24/site-monitor-agent',
+    'url'           => '%URL%',
+    'account'       => '%ACCOUNT%',
+    'serverName'        => '%SERVER%',
     'collectors'    => [
         new Php(),
      ],

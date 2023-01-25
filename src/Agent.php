@@ -15,6 +15,10 @@ class Agent
     private $url = null;
     private $environment = null;
     private $gitRepoUrl = null;
+    
+    private $account = null;
+    private $serverName = null;
+    private $operatingSystem = null;
 
     /** @var CollectorInterface[] */
     private $collectors = [];
@@ -67,6 +71,54 @@ class Agent
     public function setEnvironment($environment)
     {
         $this->environment = $environment;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAccount()
+    {
+        return $this->account;
+    }
+
+    /**
+     * @param string $account
+     */
+    public function setAccount($account)
+    {
+        $this->account = $account;
+    }
+
+    /**
+     * @return string
+     */
+    public function getServerName()
+    {
+        return $this->serverName;
+    }
+
+    /**
+     * @param string $serverName
+     */
+    public function setServerName($serverName)
+    {
+        $this->serverName = $serverName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOperatingSystem()
+    {
+        return $this->operatingSystem;
+    }
+
+    /**
+     * @param string $operatingSystem
+     */
+    public function setOperatingSystem($operatingSystem)
+    {
+        $this->operatingSystem = $operatingSystem;
     }
 
     /**
@@ -148,10 +200,13 @@ class Agent
         }
 
         return [
-            'site_id'       => $this->getSiteId(),
-            'url'           => $this->getUrl(),
             'environment'   => $this->getEnvironment(),
-            'git_repo'      => $this->getGitRepoUrl(),
+            'url'           => $this->getUrl(),
+            'server'        => [
+                'account'           => $this->getAccount(),
+                'name'              => $this->getServerName(),
+                'operating_system'  => $this->getOperatingSystem(),
+            ],          
             'data'          => $data,
         ];
     }

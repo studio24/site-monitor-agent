@@ -64,6 +64,9 @@ $agent->setSiteId($config->siteId);
 $agent->setEnvironment($config->environment);
 $agent->setGitRepoUrl($config->gitRepoUrl);
 $agent->setUrl($config->url);
+$agent->setAccount($config->account);
+$agent->setServerName($config->serverName);
+$agent->setOperatingSystem(php_uname('s') . ' ' . php_uname('r'));
 
 // Collect data
 $data = $agent->collectData();
