@@ -2,3 +2,6 @@ composer.lock
 vendor
 .phplint-cache
 .phpunit.result.cache
+/.env
+/agent-config.php
+

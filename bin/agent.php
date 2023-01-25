@@ -63,6 +63,7 @@ $agent->setCollectors($config->collectors);
 $agent->setSiteId($config->siteId);
 $agent->setEnvironment($config->environment);
 $agent->setGitRepoUrl($config->gitRepoUrl);
+$agent->setUrl($config->url);
 
 // Collect data
 $data = $agent->collectData();
@@ -73,6 +74,8 @@ if ($send) {
 
     $httpClient = new HttpClient($config->apiBaseUrl, $config->apiToken);
 
+    /*
+    
     // Testing (move this to a unit test)
     $mock = new \GuzzleHttp\Handler\MockHandler([
         new \GuzzleHttp\Psr7\Response(200, [], '{"message": "OK"}'),
@@ -80,10 +83,12 @@ if ($send) {
     $handlerStack = \GuzzleHttp\HandlerStack::create($mock);
     $client = new \GuzzleHttp\Client(['handler' => $handlerStack]);
     $httpClient->setClient($client);
+    
+    */
 
-    $httpClient->sendData($data);
+    $response = $httpClient->sendData($data);
 
-    echo "Data sent: " . PHP_EOL;
+    echo 'Response: ' . $response->getBody() . PHP_EOL;
 }
 
 // Success!

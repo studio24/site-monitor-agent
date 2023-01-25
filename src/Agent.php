@@ -111,21 +111,27 @@ class Agent
 
         /** @var CollectorInterface $collector */
         foreach ($this->collectors as $collector) {
+            
             // Get data
+            
             $name = $collector->getName();
+            
             if (!is_string($name)) {
                 Cli::error(sprintf("Data collector %s::getName() does not return a string", get_class($collector)));
                 // @todo report error
                 continue;
             }
-            $data = $collector->collectData();
-            if (!is_array($data)) {
+
+            $collected_data = $collector->collectData();
+            
+            if (!is_array($collected_data)) {
                 Cli::error(sprintf("Data collector %s::getName() does not return an array", get_class($collector)));
                 // @todo report error
                 continue;
             }
-            if (!empty($data)) {
-                $data[$name] = $data;
+            
+            if (!empty($collected_data)) {
+                $data[$name] = $collected_data;
             }
 
             // Optionally set environment and URL via collector

@@ -133,6 +133,13 @@ class Config
         }
 
         foreach ($data as $name => $value) {
+            
+            // @TODO: Add support for arrays?
+
+            if (is_array($value)) {
+                continue;
+            }
+
             if (preg_match('/^%(.+)%$/', $value, $m)) {
                 $token = $m[1];
 

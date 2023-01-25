@@ -8,7 +8,7 @@ use Studio24\Agent\Exception\FailedHttpRequestException;
 
 class HttpClient
 {
-    const API_SITE_DATA_URL = '/site/data';
+    const API_SITE_DATA_URL = '/api/update';
     const API_ERROR_URL = '/error';
 
     const USER_AGENT = 'studio24/agent (+https://github.com/studio24/site-monitor-agent/)';
@@ -26,10 +26,12 @@ class HttpClient
         // @see https://docs.guzzlephp.org/en/6.5/request-options.html
         $this->client = new Client([
             'base_uri' => $endpointUrl,
-            ['headers' =>
-                ['Authorization' => "Bearer {$authToken}"],
-                ['User-Agent' => self::USER_AGENT],
+            'headers' => [
+                'Authorization' => "Bearer {$authToken}",
+                'Accept' => 'application/json',
+                'User-Agent' => self::USER_AGENT,
             ]
+            
         ]);
     }
 
@@ -55,6 +57,8 @@ class HttpClient
         if ($response->getStatusCode() !== 200) {
             throw new FailedHttpRequestException(sprintf('Failed to send sendData HTTP request, error %s', $response->getStatusCode() . ' ' . $response->getReasonPhrase()));
         }
+
+        return $response;
     }
 
     /**
