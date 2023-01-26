@@ -132,18 +132,22 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
         return $this->wordPressVersion;
     }
 
+   /**
+     * Find and parse plugin names and versions 
+     * @return array
+     */
     public function getPlugins()
     {
         $plugins = [];
 
 
-        foreach ($this->wordPressPluginPaths as $path) {
+        foreach ($this->wordPressPluginPaths as $plugin_dir) {
 
-            if (!file_exists($this->wordPressBasePath . '/' . $path)) {
-                continue;
+            if (!file_exists($this->wordPressBasePath . '/' . $plugin_dir)) {
+                 continue;
             }
-            
-            $plugin_root_files = glob($this->wordPressBasePath . '/' . $plugin_dir . '/wp-content/plugins/*/*.php');
+
+            $plugin_root_files = glob($this->wordPressBasePath . '/' . $plugin_dir . '/*/*.php');
 
             if (is_array($plugin_root_files)) {
 
@@ -155,7 +159,15 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
 
                         $name = trim($m[1]);
                         
-                        preg_match('/Version: *(.+)/',$contents, $m);
+                        preg_match('/^.*\/(.*)\/.*.php$/', $file, $m);
+
+                        if (!empty($m[1])) {
+                            $slug = trim($m[1]);
+                        } else {
+                            $slug = $name;
+                        }
+
+                        preg_match('/Version: *(.+)/', $contents, $m);
                         
                         if (!empty($m[1])) {
                             $version = trim($m[1]);
@@ -163,9 +175,10 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
                             $version = 'N/A';
                         }
 
-                        if ($name && $version) {
-                            $plugins[$name] = $version;
-                        }
+                        $plugins[$slug] = [
+                            'name' => $name,
+                            'version' => $version
+                        ];
 
                     }
 

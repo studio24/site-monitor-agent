@@ -134,8 +134,7 @@ class Config
 
         foreach ($data as $name => $value) {
             
-            // @TODO: Add support for arrays?
-
+            // Skip the collectors array.
             if (is_array($value)) {
                 continue;
             }

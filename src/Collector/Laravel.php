@@ -13,9 +13,7 @@ class Laravel implements CollectorInterface
      */
     public function __construct($laravelBasePath = null)
     {
-        if ($laravelBasePath !== null) {
-            $this->laravelBasePath = $laravelBasePath;
-        }
+        $this->laravelBasePath = $laravelBasePath;
     }
 
     /**
@@ -65,7 +63,7 @@ class Laravel implements CollectorInterface
     protected function getDependencies()
     {
         if (!$composer = file_get_contents($this->laravelBasePath . '/composer.json')) {
-            return false;
+            return [];
         }
 
         $json = json_decode($composer, true);

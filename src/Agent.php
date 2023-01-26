@@ -18,7 +18,6 @@ class Agent
     
     private $account = null;
     private $serverName = null;
-    private $operatingSystem = null;
 
     /** @var CollectorInterface[] */
     private $collectors = [];
@@ -108,22 +107,6 @@ class Agent
     /**
      * @return string
      */
-    public function getOperatingSystem()
-    {
-        return $this->operatingSystem;
-    }
-
-    /**
-     * @param string $operatingSystem
-     */
-    public function setOperatingSystem($operatingSystem)
-    {
-        $this->operatingSystem = $operatingSystem;
-    }
-
-    /**
-     * @return string
-     */
     public function getUrl()
     {
         return $this->url;
@@ -200,12 +183,11 @@ class Agent
         }
 
         return [
-            'environment'   => $this->getEnvironment(),
-            'url'           => $this->getUrl(),
-            'server'        => [
-                'account'           => $this->getAccount(),
-                'name'              => $this->getServerName(),
-                'operating_system'  => $this->getOperatingSystem(),
+            'environment'       => $this->getEnvironment(),
+            'url'               => $this->getUrl(),
+            'hosting'           => [
+                'account'       => $this->getAccount(),
+                'server_name'   => $this->getServerName(),
             ],          
             'data'          => $data,
         ];
