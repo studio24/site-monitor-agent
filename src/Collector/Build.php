@@ -43,7 +43,9 @@ class Build implements CollectorInterface
     {
         $data = [];
 
-        if (!$build_summary = file_get_contents($this->buildFile)) {
+	$filePath = 'https://www.studio24.net/'.$this->buildFile;
+
+        if (!$build_summary = file_get_contents($filePath)) {
             return [];
         }
 
