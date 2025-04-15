@@ -19,6 +19,7 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
         'htdocs',
         'web/wordpress',
         'htdocs/wordpress',
+        '../studio24/web'
     ];
 
     /** @var string[]  */
@@ -145,7 +146,6 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
     {
         $plugins = [];
 
-
         foreach ($this->wordPressPluginPaths as $plugin_dir) {
 
             if (!file_exists($this->wordPressBasePath . '/' . $plugin_dir)) {
@@ -181,7 +181,8 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
                         }
 
                         $plugins[$slug] = [
-                            'name' => $name,
+                            'slug' => $slug,
+                            'parent' => 'wordpress',
                             'version' => $version
                         ];
 
@@ -201,10 +202,13 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
     public function collectData()
     {
         $this->findWordPress();
+        $plugins = $this->getPlugins();
 
-        return [
-            'version' => $this->getWordPressVersion(),
-            'plugins' => $this->getPlugins()
-        ];
+        return array_merge(
+            [
+                ['slug' => 'wordpress', 'version' => $this->getWordPressVersion()]
+            ],
+            $plugins
+        );
     }
 }

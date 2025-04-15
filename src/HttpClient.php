@@ -8,7 +8,7 @@ use Studio24\Agent\Exception\FailedHttpRequestException;
 
 class HttpClient
 {
-    const API_SITE_DATA_URL = '/api/update';
+    const API_SITE_DATA_URL = '/api/v1/update';
     const API_ERROR_URL = '/error';
 
     const USER_AGENT = 'studio24/agent (+https://github.com/studio24/site-monitor-agent/)';
@@ -25,6 +25,7 @@ class HttpClient
     {
         // @see https://docs.guzzlephp.org/en/6.5/request-options.html
         $this->client = new Client([
+            'verify' => false, // Required for DDEV SSL certs
             'base_uri' => $endpointUrl,
             'headers' => [
                 'Authorization' => "Bearer {$authToken}",

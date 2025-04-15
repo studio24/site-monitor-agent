@@ -14,7 +14,7 @@ class Config
     /** @var array */
     private $expected = [
         'string' => [
-            'apiBaseUrl', 'apiToken', 'siteId', 'environment', 'gitRepoUrl'
+            'apiBaseUrl', 'apiToken', 'environment', 'gitRepoUrl'
         ],
         'array' => [
             'collectors'
@@ -26,6 +26,7 @@ class Config
         './',
         '../',
         '../config/',
+        './config/',
         '../../../../',
     ];
 

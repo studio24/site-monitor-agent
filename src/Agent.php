@@ -157,11 +157,7 @@ class Agent
             }
 
             // Add the collected data to the $data array
-            if (isset($collectedData['slug'])) {
-                $data = array_merge($data, $collectedData);
-            } else {
-                $data = array_push($data, $collectedData);
-            }
+            $data[] = $collectedData;
 
             // Optionally set environment and URL via collector
             // @todo is this required?
@@ -176,15 +172,32 @@ class Agent
                 }
             }
         }
-
         return [
             'environment'       => $this->getEnvironment(),
             'url'               => $this->getUrl(),
-            'hosting'           => [
-                'account'       => $this->getAccount(),
-                'server_name'   => $this->getServerName(),
-            ],          
-            'versions'          => $data,
+            'repo_url'          => $this->getGitRepoUrl(),
+            'versions'          => $this->flattenData($data),
         ];
+    }
+
+    /**
+     * Flatten out arrays of data before passing to the API
+     *
+     * @param array $data
+     * @return array
+     */
+    public function flattenData(array $data): array
+    {
+        $flattened = [];
+        foreach ($data as $item) {
+            if (!empty($item['slug'])) {
+                $flattened[] = $item;
+            } else {
+                foreach ($item as $value) {
+                    $flattened[] = $value;
+                }
+            }
+        }
+        return $flattened;
     }
 }
