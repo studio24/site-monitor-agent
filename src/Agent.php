@@ -148,28 +148,23 @@ class Agent
         foreach ($this->collectors as $collector) {
             
             // Get data
-            
-            $name = $collector->getName();
-            
-            if (!is_string($name)) {
-                Cli::error(sprintf("Data collector %s::getName() does not return a string", get_class($collector)));
-                // @todo report error
-                continue;
-            }
+            $collectedData = $collector->collectData();
 
-            $collected_data = $collector->collectData();
-            
-            if (!is_array($collected_data)) {
+            if (!is_array($collectedData)) {
                 Cli::error(sprintf("Data collector %s::getName() does not return an array", get_class($collector)));
                 // @todo report error
                 continue;
             }
-            
-            if (!empty($collected_data)) {
-                $data[$name] = $collected_data;
+
+            // Add the collected data to the $data array
+            if (isset($collectedData['slug'])) {
+                $data = array_merge($data, $collectedData);
+            } else {
+                $data = array_push($data, $collectedData);
             }
 
             // Optionally set environment and URL via collector
+            // @todo is this required?
             if ($collector instanceof ApplicationInterface) {
                 $environment = $collector->getEnvironment();
                 if (is_string($environment) && !empty($environment)) {
@@ -189,7 +184,7 @@ class Agent
                 'account'       => $this->getAccount(),
                 'server_name'   => $this->getServerName(),
             ],          
-            'data'          => $data,
+            'versions'          => $data,
         ];
     }
 }
