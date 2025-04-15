@@ -33,10 +33,13 @@ class Laravel implements CollectorInterface
      */
     public function collectData()
     {
-        return [
-            'version' => $this->getVersion(),
-            'dependencies' => $this->getDependencies()
-        ];
+        return array_merge(
+            [[
+                'slug' => 'laravel',
+                'version' => $this->getVersion()
+            ]],
+            $this->getDependencies()
+        );
     }
 
     /**
@@ -60,7 +63,7 @@ class Laravel implements CollectorInterface
 
     /**
      * Lookup depenencies from composer.json
-     * @return string
+     * @return array
      */
     protected function getDependencies()
     {
@@ -72,7 +75,15 @@ class Laravel implements CollectorInterface
 
         $dependencies = $json['require'] ?? [];
 
-        return $dependencies;
-        
+        $data = [];
+        foreach ($dependencies as $name => $version) {
+            $data[] = [
+                'slug' => $name,
+                'parent' => 'laravel',
+                'version' => $version
+            ];
+        }
+
+        return $data;
     }
 }
