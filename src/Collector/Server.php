@@ -2,6 +2,8 @@
 
 namespace Studio24\Agent\Collector;
 
+use Studio24\Agent\Interfaces\CollectorInterface;
+
 class Server implements CollectorInterface
 {
     /**

@@ -2,8 +2,8 @@
 
 namespace Studio24\Agent;
 
-use Studio24\Agent\Collector\VerboseTrait;
 use Studio24\Agent\Exception\InvalidConfigException;
+use Studio24\Agent\Traits\VerboseTrait;
 
 class Config
 {

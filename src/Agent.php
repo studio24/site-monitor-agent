@@ -2,10 +2,10 @@
 
 namespace Studio24\Agent;
 
-use Studio24\Agent\Collector\ApplicationInterface;
-use Studio24\Agent\Collector\CollectorInterface;
-use Studio24\Agent\Collector\VerboseInterface;
-use Studio24\Agent\Collector\VerboseTrait;
+use Studio24\Agent\Interfaces\ApplicationInterface;
+use Studio24\Agent\Interfaces\CollectorInterface;
+use Studio24\Agent\Interfaces\VerboseInterface;
+use Studio24\Agent\Traits\VerboseTrait;
 
 class Agent
 {

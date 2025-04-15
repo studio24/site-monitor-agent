@@ -1,6 +1,6 @@
 <?php
 
-namespace Studio24\Agent\Collector;
+namespace Studio24\Agent\Traits;
 
 trait ApplicationTrait
 {

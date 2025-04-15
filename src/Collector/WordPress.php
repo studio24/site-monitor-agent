@@ -3,6 +3,11 @@
 namespace Studio24\Agent\Collector;
 
 use Studio24\Agent\Cli;
+use Studio24\Agent\Interfaces\ApplicationInterface;
+use Studio24\Agent\Interfaces\CollectorInterface;
+use Studio24\Agent\Interfaces\VerboseInterface;
+use Studio24\Agent\Traits\ApplicationTrait;
+use Studio24\Agent\Traits\VerboseTrait;
 
 class WordPress implements CollectorInterface, VerboseInterface, ApplicationInterface
 {

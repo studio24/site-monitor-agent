@@ -1,6 +1,6 @@
 <?php
 
-namespace Studio24\Agent\Collector;
+namespace Studio24\Agent\Interfaces;
 
 /**
  * Support setting URL and environment from collector, return null if data is not returned
