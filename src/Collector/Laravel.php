@@ -6,7 +6,6 @@ use Studio24\Agent\Interfaces\CollectorInterface;
 
 class Laravel implements CollectorInterface
 {
-
     private $laravelBasePath = null;
 
      /**
@@ -39,7 +38,9 @@ class Laravel implements CollectorInterface
             'version' => $this->getVersion()
         ];
 
-        return array_merge($core, $this->getDependencies());
+        $composer = new Composer($this->laravelBasePath, 'laravel');
+
+        return array_merge($core, $composer->collectData());
     }
 
     /**
@@ -48,7 +49,6 @@ class Laravel implements CollectorInterface
      */
     protected function getVersion()
     {
-
         $app = file_get_contents($this->laravelBasePath . '/vendor/laravel/framework/src/Illuminate/Foundation/Application.php');
 
         if (preg_match("/VERSION = '(.+?)';/", $app, $m) && $m[1]) {
@@ -61,29 +61,4 @@ class Laravel implements CollectorInterface
 
     }
 
-    /**
-     * Lookup depenencies from composer.json
-     * @return array
-     */
-    protected function getDependencies()
-    {
-        if (!$composer = file_get_contents($this->laravelBasePath . '/composer.json')) {
-            return [];
-        }
-
-        $json = json_decode($composer, true);
-
-        $dependencies = $json['require'] ?? [];
-
-        $data = [];
-        foreach ($dependencies as $name => $version) {
-            $data[] = [
-                'slug' => $name,
-                'parent' => 'laravel',
-                'version' => $version
-            ];
-        }
-
-        return $data;
-    }
 }
