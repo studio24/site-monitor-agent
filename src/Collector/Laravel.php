@@ -33,13 +33,13 @@ class Laravel implements CollectorInterface
      */
     public function collectData()
     {
-        return array_merge(
-            [[
-                'slug' => 'laravel',
-                'version' => $this->getVersion()
-            ]],
-            $this->getDependencies()
-        );
+        $core = [];
+        $core[] = [
+            'slug' => 'laravel',
+            'version' => $this->getVersion()
+        ];
+
+        return array_merge($core, $this->getDependencies());
     }
 
     /**

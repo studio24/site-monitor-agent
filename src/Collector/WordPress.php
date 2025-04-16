@@ -204,11 +204,12 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
         $this->findWordPress();
         $plugins = $this->getPlugins();
 
-        return array_merge(
-            [
-                ['slug' => 'wordpress', 'version' => $this->getWordPressVersion()]
-            ],
-            $plugins
-        );
+        $core = [];
+        $core[] = [
+            'slug' => 'wordpress',
+            'version' => '1.3.3'
+        ];
+
+        return array_merge($core, $plugins);
     }
 }
