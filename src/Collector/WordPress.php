@@ -197,7 +197,7 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
         $core = [];
         $core[] = [
             'slug' => 'wordpress',
-            'version' => '1.3.3'
+            'version' => $this->getWordPressVersion()
         ];
 
         return array_merge($core, $plugins);
