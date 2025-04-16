@@ -9,6 +9,7 @@ use Studio24\Agent\Exception\FailedHttpRequestException;
 class HttpClient
 {
     const API_SITE_DATA_URL = '/api/v1/update';
+    const API_SITE_DEPLOYMENT_URL = '/api/v1/deployment';
     const API_ERROR_URL = '/error';
 
     const USER_AGENT = 'studio24/agent (+https://github.com/studio24/site-monitor-agent/)';
@@ -52,6 +53,23 @@ class HttpClient
     public function sendData($data)
     {
         $response = $this->client->request('POST', self::API_SITE_DATA_URL, [
+            'json' => $data
+        ]);
+
+        if ($response->getStatusCode() !== 200) {
+            throw new FailedHttpRequestException(sprintf('Failed to send sendData HTTP request, error %s', $response->getStatusCode() . ' ' . $response->getReasonPhrase()));
+        }
+
+        return $response;
+    }
+    /**
+     * Send array of data to site monitoring tool for deployment
+     * @param array $data
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function sendDeployment($data)
+    {
+        $response = $this->client->request('POST', self::API_SITE_DEPLOYMENT_URL, [
             'json' => $data
         ]);
 
