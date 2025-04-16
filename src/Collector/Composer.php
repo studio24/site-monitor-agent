@@ -53,7 +53,6 @@ class Composer implements CollectorInterface
                 $include = false;
                 foreach ($dependenciesFromComposerJson as $jsonDependency) {
                     if ($jsonDependency['slug'] === $name) {
-                        // Skip if already in composer.json
                         $include = true;
                     }
                 }
@@ -70,9 +69,7 @@ class Composer implements CollectorInterface
                 'version' => \Composer\InstalledVersions::getVersion($name)
             ];
         }
-
-        var_dump($data);
-
+        
         return $data;
     }
 
