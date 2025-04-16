@@ -22,15 +22,6 @@ class Composer implements CollectorInterface
     }
 
     /**
-     * Return collector name
-     * @return string
-     */
-    public function getName()
-    {
-        return 'Composer';
-    }
-
-    /**
      * Collect data, should return an array of data
      * @return array
      */
@@ -40,12 +31,58 @@ class Composer implements CollectorInterface
     }
 
     /**
+     * Get installed dependencies from \Composer\InstalledVersions class.
+     *
+     * @param bool $includeAll
+     * @return array
+     */
+    protected function getDependencies($includeAll = false)
+    {
+        // This returns all dependencies, including dependencies of dependencies.
+        // Setting $includeAll to false strips out all dependencies that are not
+        // mentioned in the composer.json file.
+
+        $installedDependencies = \Composer\InstalledVersions::getInstalledPackages();
+        $dependenciesFromComposerJson = $this->getDependenciesFromJson();
+
+        $data = [];
+        foreach ($installedDependencies as $name) {
+
+            if (!$includeAll) {
+                // We'll check if the installed package was mentioned in composer.json
+                $include = false;
+                foreach ($dependenciesFromComposerJson as $jsonDependency) {
+                    if ($jsonDependency['slug'] === $name) {
+                        // Skip if already in composer.json
+                        $include = true;
+                    }
+                }
+
+                // If it wasn't, skip it.
+                if (!$include) {
+                    continue;
+                }
+            }
+
+            $data[] = [
+                'slug' => $name,
+                'parent' => $this->parentSlug,
+                'version' => \Composer\InstalledVersions::getVersion($name)
+            ];
+        }
+
+        var_dump($data);
+
+        return $data;
+    }
+
+    /**
      * Lookup dependencies from composer.json
      * @return array
      */
-    protected function getDependencies()
+    protected function getDependenciesFromJson()
     {
-        if (!$composer = file_get_contents($this->basePath . '/composer.json')) {
+        if (!$composer = file_get_contents('composer.json')) {
             return [];
         }
 
@@ -61,11 +98,6 @@ class Composer implements CollectorInterface
             if (!preg_match('/^.*?\/.*?$/', $name, $matches)) {
                 continue;
             }
-
-//            $version = 'N/A';
-//            if (\Composer\InstalledVersions::isInstalled($name, false)) {
-//                $version = \Composer\InstalledVersions::getVersion($name);
-//            }
 
             $data[] = [
                 'slug' => $name,

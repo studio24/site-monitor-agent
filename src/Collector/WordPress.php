@@ -121,15 +121,6 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
     }
 
     /**
-     * Return collector name
-     * @return string
-     */
-    public function getName()
-    {
-        return 'WordPress';
-    }
-
-    /**
      * @return string
      */
     public function getWordPressVersion()

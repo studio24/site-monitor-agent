@@ -7,15 +7,6 @@ use Studio24\Agent\Interfaces\CollectorInterface;
 class Server implements CollectorInterface
 {
     /**
-     * Return collector name
-     * @return string
-     */
-    public function getName()
-    {
-        return 'Server';
-    }
-
-    /**
      * Collect data, should return an array of data
      * @return array
      */

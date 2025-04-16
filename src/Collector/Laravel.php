@@ -18,15 +18,6 @@ class Laravel implements CollectorInterface
     }
 
     /**
-     * Return collector name
-     * @return string
-     */
-    public function getName()
-    {
-        return 'Laravel';
-    }
-
-    /**
      * Collect data, should return an array of data
      * @return array
      */

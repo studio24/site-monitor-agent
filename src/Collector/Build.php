@@ -17,15 +17,6 @@ class Build implements CollectorInterface
     }
 
     /**
-     * Return collector name
-     * @return string
-     */
-    public function getName()
-    {
-        return 'Build';
-    }
-
-    /**
      * Collect data, should return an array of data
      * @return array
      */
