@@ -18,8 +18,7 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
         'web',
         'htdocs',
         'web/wordpress',
-        'htdocs/wordpress',
-        '../studio24/web'
+        'htdocs/wordpress'
     ];
 
     /** @var string[]  */
