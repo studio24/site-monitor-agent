@@ -20,6 +20,9 @@ LARAVEL_CORE_DIR=$TMPDIR
 rm -Rf $LARAVEL_CORE_DIR
 mkdir -p $LARAVEL_CORE_DIR
 
+# We need to do this on PHP 5.6 to ensure Laravel installs correctly (otherwise plugin kylekatarnls/update-helper halts composer install)
+composer --global config allow-plugins false
+
 # Download Laravel
 echo "Downloading Laravel to $LARAVEL_CORE_DIR"
 rm -Rf $LARAVEL_CORE_DIR
