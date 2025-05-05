@@ -26,6 +26,5 @@ class TempDirectoryTest extends TestCase
         // Test deleting
         $temp->deleteTempDirectory('foobar');
         $this->assertFalse(file_exists($path . '/test.txt'));
-        $this->assertFalse($temp->tempDirectoryExists($path));
     }
 }

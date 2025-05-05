@@ -106,7 +106,7 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
                 $this->wordPressVersion = $wp_version;
                 $this->wordPressBasePath = $path;
 
-                Cli::info(sprintf("WordPress %s installation found at %s", $wp_version, $path));
+                Cli::info(sprintf("WordPress %s installation found at %s", $this->wordPressVersion, $this->wordPressBasePath));
                 return true;
             }
         }
@@ -119,7 +119,7 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
      */
     public function foundWordPress()
     {
-        return (null !== $this->wordPressVersion);
+        return !empty($this->wordPressVersion);
     }
 
     /**
