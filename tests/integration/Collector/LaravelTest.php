@@ -41,7 +41,6 @@ class LaravelTest extends AgentTestCase
     {
         $collector = new Laravel($this->path);
         $data = $collector->collectData();
-        echo $data->toJson(true);
 
         // This reads the Laravel version from the tmp folder
         $this->assertTrue($this->slugExists($data, 'laravel'));
