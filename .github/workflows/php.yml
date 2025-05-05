@@ -36,8 +36,10 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist
 
-      - name: Code lint PHP files
-        run: ./vendor/bin/phplint
+      - name: Code lint all PHP files in directory
+        run: |
+          find bin/ -name '*.php' -exec php -l {} \;
+          find src/ -name '*.php' -exec php -l {} \;
 
       - name: Coding standards
         run: ./vendor/bin/phpcs
