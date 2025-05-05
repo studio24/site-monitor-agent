@@ -32,7 +32,7 @@ trait ExecTrait
         foreach ($locations as $location) {
             if (file_exists(sprintf('%s/%s', $location, $command))) {
                 $command = sprintf('%s/%s %s', $location, $command, $arguments);
-                exec($command, $output, $resultCode);
+                exec(escapeshellcmd($command), $output, $resultCode);
                 if ($resultCode !== 0) {
                     throw new CommandException(sprintf("Command %s failed, returning error code: %d", $command, $resultCode));
                 }
