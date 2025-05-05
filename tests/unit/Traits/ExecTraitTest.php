@@ -22,7 +22,7 @@ class ExecTraitTest extends TestCase
         $output = $object->exec('ls', __DIR__);
         $this->assertStringContainsString('ExecTraitTest.php', $output);
     }
-    
+
     public function testMissing()
     {
         $object = new ExecTestClass();
