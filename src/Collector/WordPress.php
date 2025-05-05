@@ -57,7 +57,7 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
         $attempted = [];
 
         // Try the passed base path
-        if ($this->wordPressBasePath !== null) {
+        if (null !== $this->wordPressBasePath) {
             $attempted[] = $this->wordPressBasePath;
             if (!$this->detectWordPress($this->wordPressBasePath)) {
                 Cli::error("WordPress installation not found at " . $this->wordPressBasePath);
@@ -99,15 +99,13 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
         Cli::info(sprintf('Looking for WordPress in %s', $path));
         $includesPath = $path . DIRECTORY_SEPARATOR . 'wp-includes' . DIRECTORY_SEPARATOR;
         if (is_dir($includesPath) && file_exists($includesPath . 'version.php')) {
+            /** @link https://github.com/WordPress/WordPress/blob/master/wp-includes/version.php */
             require $includesPath . 'version.php';
             if (isset($wp_version)) {
                 $this->wordPressVersion = $wp_version;
                 $this->wordPressBasePath = $path;
 
-                if ($this->isVerbose()) {
-                    Cli::info("WordPress installation found at $path");
-                }
-
+                Cli::info("WordPress installation found at $path");
                 return true;
             }
         }
