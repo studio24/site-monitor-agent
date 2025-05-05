@@ -22,6 +22,7 @@ mkdir -p $LARAVEL_CORE_DIR
 
 # Download Laravel
 echo "Downloading Laravel to $LARAVEL_CORE_DIR"
+rm -Rf $LARAVEL_CORE_DIR
 composer --no-dev -q --no-scripts create-project laravel/laravel $LARAVEL_CORE_DIR
 
 echo "All done!"
