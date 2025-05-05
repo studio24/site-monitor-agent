@@ -4,7 +4,7 @@ Agent to send data to the [Studio 24 site monitoring tool](https://github.com/st
 See [documentation](docs/README.md).
 
 ## Requirements
-* PHP 5.5 to 8.1
+* PHP 5.6 to 8.4
 * [Composer](https://getcomposer.org/)
 
 ## Installation
