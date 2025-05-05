@@ -133,7 +133,12 @@ class Composer implements CollectorInterface
 
         $json = json_decode($composer, true);
 
-        $dependencies = $json['require'] ?? [];
+        if (isset($json['require'])) {
+            $dependencies = $json['require'];
+        } else {
+            $dependencies = [];
+        }
+
 
         $data = [];
         foreach ($dependencies as $name => $version) {

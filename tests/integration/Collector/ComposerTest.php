@@ -7,7 +7,7 @@ use Studio24\Agent\Test\AgentTestCase;
 
 class ComposerTest extends AgentTestCase
 {
-    public function testLaravelCollector()
+    public function testComposer()
     {
         $collector = new Composer();
         $data = $collector->collectData();

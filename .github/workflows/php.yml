@@ -39,8 +39,8 @@ jobs:
 
       - name: Code lint all PHP files in directory
         run: |
-          find bin/ -name '*.php' -exec php -l {} \;
-          find src/ -name '*.php' -exec php -l {} \;
+          sh -c "! (find bin/ -type f -name \"*.php\" $1 -exec php -l -n {} \; | grep -v \"No syntax errors detected\")"
+          sh -c "! (find src/ -type f -name \"*.php\" $1 -exec php -l -n {} \; | grep -v \"No syntax errors detected\")"
 
       - name: Coding standards
         run: ./vendor/bin/phpcs
