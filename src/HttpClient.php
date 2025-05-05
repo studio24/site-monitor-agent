@@ -5,14 +5,14 @@ namespace Studio24\Agent;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use Studio24\Agent\Exception\FailedHttpRequestException;
+use Studio24\Agent\Traits\TypeTrait;
 
 class HttpClient
 {
-    const API_SITE_DATA_URL = '/api/v1/update';
-    const API_SITE_DEPLOYMENT_URL = '/api/v1/deployment';
-    const API_ERROR_URL = '/error';
+    use TypeTrait;
 
-    const USER_AGENT = 'studio24/agent (+https://github.com/studio24/site-monitor-agent/)';
+    const API_SEND_DATA_URL = '/api/v1/update';
+    const API_SEND_DEPLOYMENT_URL = '/api/v1/deployment';
 
     /** @var Client */
     private $client;
@@ -24,17 +24,20 @@ class HttpClient
      */
     public function __construct($endpointUrl, $authToken)
     {
-        // @see https://docs.guzzlephp.org/en/6.5/request-options.html
-        $this->client = new Client([
+        /**
+         * Set default client
+         * @see https://docs.guzzlephp.org/en/6.5/request-options.html
+         * @see https://docs.guzzlephp.org/en/latest/request-options.html
+         */
+        $this->setClient(new Client([
             'verify' => false, // Required for DDEV SSL certs
             'base_uri' => $endpointUrl,
             'headers' => [
                 'Authorization' => "Bearer {$authToken}",
                 'Accept' => 'application/json',
-                'User-Agent' => self::USER_AGENT,
+                'User-Agent' => Version::getUserAgent(),
             ]
-            
-        ]);
+        ]));
     }
 
     /**
@@ -42,17 +45,29 @@ class HttpClient
      */
     public function setClient($client)
     {
+        $this->throwIfNotInstanceOf('\GuzzleHttp\ClientInterface', 'client', $client);
         $this->client = $client;
     }
 
     /**
      * Send array of data to site monitoring tool
+     *
+     * Expecting JSON array:
+     * - name
+     * - url
+     * - repo_url
+     * - versions (array)
+     *   - slug
+     *   - version
+     *   - parent
+     *
      * @param array $data
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function sendData($data)
     {
-        $response = $this->client->request('POST', self::API_SITE_DATA_URL, [
+        $this->throwIfNotArray('data', $data);
+        $response = $this->client->request('POST', self::API_SEND_DATA_URL, [
             'json' => $data
         ]);
 
@@ -62,14 +77,22 @@ class HttpClient
 
         return $response;
     }
+
     /**
      * Send array of data to site monitoring tool for deployment
+     *
+     *  Expecting JSON array:
+     *  - author
+     *  - date
+     *  - branch
+     *
      * @param array $data
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function sendDeployment($data)
     {
-        $response = $this->client->request('POST', self::API_SITE_DEPLOYMENT_URL, [
+        $this->throwIfNotArray('data', $data);
+        $response = $this->client->request('POST', self::API_SEND_DEPLOYMENT_URL, [
             'json' => $data
         ]);
 
@@ -79,25 +102,4 @@ class HttpClient
 
         return $response;
     }
-
-    /**
-     * Send error message and any relevant data to the site monitoring tool
-     * @param string $message
-     * @param array $data
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    public function reportError($message, $data)
-    {
-        $response = $this->client->request('POST', self::API_ERROR_URL, [
-            'json' => [
-                'message' => $message,
-                'data' => $data
-            ]
-        ]);
-
-        if ($response->getStatusCode() !== 200) {
-            throw new FailedHttpRequestException(sprintf('Failed to send reportError HTTP request, error %s', $response->getStatusCode() . ' ' . $response->getReasonPhrase()));
-        }
-    }
-
 }

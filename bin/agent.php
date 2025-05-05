@@ -14,13 +14,14 @@ $cli = new Cli($argc, $argv, 'Site monitor agent');
 
 // Run help command
 if (isset($argv[1]) && in_array($argv[1], ['--help', '-help', '-h', '-?'])) {
-    $cli->help('Collects data from a website or web application and sends this to a central server. Run without any arguments to collect data and output to terminal (dry run mode: no data is sent).', 'php agent.php [<send>]', [
+    $cli->help('Collects data from a website or web application and sends this to a central server. Run without any arguments to collect data and output to terminal (dry run mode: no data is sent).',
+        'php agent.php [<send>]', [
         'send' => 'Send data to API endpoint, if this argument is not set then no data is sent',
         'setup' => 'Copy example config file to project',
         '-v' => 'Verbose mode',
         '--help' => 'This help text',
     ]);
-    exit(0);
+    exit(Cli::SUCCESS);
 }
 
 // Verbose mode?
@@ -68,8 +69,8 @@ $agent->setAccount($config->account);
 $agent->setServerName($config->serverName);
 
 // Collect data
-$data = $agent->collectData();
-echo json_encode($data, JSON_PRETTY_PRINT) . PHP_EOL;
+$agent->collectData();
+echo $agent->toJson(true) . PHP_EOL;
 
 // Send request
 if ($send) {
@@ -88,10 +89,10 @@ if ($send) {
     
     */
 
-    $response = $httpClient->sendData($data);
+    $response = $httpClient->sendData($agent->toJson());
 
     echo 'Response: ' . $response->getBody() . PHP_EOL;
 }
 
 // Success!
-exit(0);
+exit(Cli::SUCCESS);

@@ -45,5 +45,4 @@ trait ApplicationTrait
     {
         $this->url = $url;
     }
-
 }

@@ -5,7 +5,6 @@ error_reporting(E_ALL ^ E_DEPRECATED);
 
 require 'vendor/autoload.php';
 
-use Studio24\Agent\Agent;
 use Studio24\Agent\Cli;
 use Studio24\Agent\Config;
 use Studio24\Agent\HttpClient;
@@ -14,11 +13,13 @@ $cli = new Cli($argc, $argv, 'Site monitor agent deployment');
 
 // Run help command
 if (isset($argv[1]) && in_array($argv[1], ['--help', '-help', '-h', '-?'])) {
-    $cli->help('Sends a deployment to a central server. ', 'php agent.php [<branch>, <author>]', [
+    $cli->help('Sends a deployment to a central server. ',
+        'php agent.php [<branch> <author> <date>]', [
+        'send' => 'Send data to API endpoint, if this argument is not set then no data is sent',
         '-v' => 'Verbose mode',
         '--help' => 'This help text',
     ]);
-    exit(0);
+    exit(Cli::SUCCESS);
 }
 
 // Verbose mode?
@@ -30,11 +31,6 @@ if (isset($argv[1]) && in_array('-v', $argv)) {
 
 $action = $cli->getArgument(1);
 switch ($action) {
-    case 'setup':
-        // Run setup command
-        $cli->setup();
-        exit(0);
-        break;
     case 'send':
         $send = true;
         break;
@@ -48,7 +44,6 @@ $config->setVerbose($verbose);
 $config->validate();
 
 // Create deployment
-
 $branch = $action = $cli->getArgument(1);
 $author = $action = $cli->getArgument(2);
 $date = $action = $cli->getArgument(3) ? $action = $cli->getArgument(3) : date('Y-m-d H:i:s');
@@ -88,8 +83,8 @@ if ($branch && $author && $date) {
 } else {
     echo 'Missing at least one of required parameters: branch, author, date' . PHP_EOL;
     echo json_encode($data, JSON_PRETTY_PRINT) . PHP_EOL;
-    exit(1);
+    exit(Cli::INVALID);
 }
 
 // Success!
-exit(0);
+exit(Cli::SUCCESS);

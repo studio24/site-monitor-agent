@@ -5,7 +5,7 @@ namespace Studio24\Agent\Collector;
 use Studio24\Agent\Interfaces\CollectorInterface;
 use Studio24\Agent\Model\VersionCollection;
 
-class Php implements CollectorInterface
+class Symfony implements CollectorInterface
 {
     /**
      * Collect data
@@ -14,7 +14,9 @@ class Php implements CollectorInterface
     public function collectData()
     {
         $data = new VersionCollection();
-        $data->add('php', phpversion());
-        return $data;
+        $composer = new Composer('symfony');
+
+        $data->add('symfony', $composer->getPackageVersion('symfony/framework-bundle'));
+        return $data->merge($composer->collectData());
     }
 }

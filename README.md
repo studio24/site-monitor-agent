@@ -11,6 +11,12 @@ See [documentation](docs/README.md).
 
 See [installation](docs/installation.md).
 
+## TODO
+- [ ] Add Symfony collector
+- [ ] Add Sylius collector 
+- [ ] Set aliases for a website (config)
+- [ ] Set redirect URLs for a website (config)
+
 ## Usage
 
 Collect data and run in dry-run mode (outputs data to send, but does not send any data to the API endpoint):
@@ -43,6 +49,26 @@ We expect to use this to collect data on things like:
 * Composer packages?
 * Node version
 * SSL certificates
+
+## Tests
+
+Run all tests:
+
+```shell
+./vendor/bin/phpunit
+```
+
+Run unit tests:
+
+```shell
+./vendor/bin/phpunit --testsuite unit
+```
+
+Run integration tests:
+
+```shell
+./vendor/bin/phpunit --testsuite integration
+```
 
 ## Credits
 - **Simon R Jones** - *Lead Developer* - Studio 24

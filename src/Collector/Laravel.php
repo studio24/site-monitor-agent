@@ -3,53 +3,32 @@
 namespace Studio24\Agent\Collector;
 
 use Studio24\Agent\Interfaces\CollectorInterface;
+use Studio24\Agent\Model\VersionCollection;
 
 class Laravel implements CollectorInterface
 {
-    private $laravelBasePath = null;
+    /** @var Composer */
+    protected $composer;
 
      /**
      * Constructor
-     * @param null $wordPressBasePath
+     * @param null $basePath
      */
-    public function __construct($laravelBasePath = null)
+    public function __construct($basePath = null)
     {
-        $this->laravelBasePath = $laravelBasePath;
+        $this->composer = new Composer($basePath, 'laravel');
     }
 
     /**
-     * Collect data, should return an array of data
-     * @return array
+     * Collect data
+     * @return VersionCollection
      */
     public function collectData()
     {
-        $core = [];
-        $core[] = [
-            'slug' => 'laravel',
-            'version' => $this->getVersion()
-        ];
+        $data = new VersionCollection();
 
-        $composer = new Composer($this->laravelBasePath, 'laravel');
-
-        return array_merge($core, $composer->collectData());
+        $data->add('laravel', $this->composer->getPackageVersion('laravel/framework'));
+        $this->composer->exclude('laravel/framework');
+        return $data->merge($this->composer->collectData());
     }
-
-    /**
-     * Lookup Laravel version from Application.php
-     * @return string
-     */
-    protected function getVersion()
-    {
-        $app = file_get_contents($this->laravelBasePath . '/vendor/laravel/framework/src/Illuminate/Foundation/Application.php');
-
-        if (preg_match("/VERSION = '(.+?)';/", $app, $m) && $m[1]) {
-            $version = $m[1];
-        } else {
-            $version = 'N/A';
-        }
-
-        return $version;
-
-    }
-
 }

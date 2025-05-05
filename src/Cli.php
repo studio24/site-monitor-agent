@@ -7,6 +7,15 @@ namespace Studio24\Agent;
  */
 class Cli
 {
+    /** @var int Return code for command ran successfully */
+    const SUCCESS = 0;
+
+    /** @var int Return code for command failed */
+    const FAILURE = 1;
+
+    /** @var int Return code for incorrect or missing arguments */
+    const INVALID = 2;
+
     const ARGUMENT_SPACING = 23;
     const RED   = "\033[31m";
     const GREEN = "\033[32m";
@@ -87,7 +96,6 @@ $usage
 $argumentsText
 
 EOD;
-
     }
 
     /**

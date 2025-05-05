@@ -10,6 +10,7 @@ return [
     'url'           => '%MONITOR_URL%',
     'collectors'    => [
         new Php(),
+        new Composer(),
         new Wordpress(),
      ],
 ];

@@ -6,15 +6,20 @@ use Studio24\Agent\Cli;
 use Studio24\Agent\Interfaces\ApplicationInterface;
 use Studio24\Agent\Interfaces\CollectorInterface;
 use Studio24\Agent\Interfaces\VerboseInterface;
+use Studio24\Agent\Model\VersionCollection;
 use Studio24\Agent\Traits\ApplicationTrait;
 use Studio24\Agent\Traits\VerboseTrait;
 
 class WordPress implements CollectorInterface, VerboseInterface, ApplicationInterface
 {
-    use VerboseTrait, ApplicationTrait;
+    use VerboseTrait;
+    use ApplicationTrait;
+
+    /** @var VersionCollection */
+    private $data;
 
     /** @var string[] */
-    private $wordPressBasePaths = [
+    private $defaultBasePaths = [
         'web',
         'htdocs',
         'web/wordpress',
@@ -22,16 +27,16 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
     ];
 
     /** @var string[]  */
-    private $wordPressPluginPaths = [
+    private $defaultPluginPaths = [
         'wp-content/plugins',
         'content/plugins',
     ];
 
-    /** @var string */
-    private $wordPressBasePath;
+    /** @var ?string */
+    private $wordPressBasePath = null;
 
-    /** @var string */
-    private $wordPressVersion;
+    /** @var ?string */
+    private $wordPressVersion = null;
 
     /**
      * Constructor
@@ -49,28 +54,36 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
      */
     public function findWordPress()
     {
-        // Detect paths
+        $attempted = [];
+
+        // Try the passed base path
         if ($this->wordPressBasePath !== null) {
+            $attempted[] = $this->wordPressBasePath;
             if (!$this->detectWordPress($this->wordPressBasePath)) {
                 Cli::error("WordPress installation not found at " . $this->wordPressBasePath);
                 $this->wordPressBasePath = null;
             }
         }
+
+        // Try the default base paths
         if (!$this->foundWordPress()) {
-            foreach ($this->wordPressBasePaths as $path) {
+            foreach ($this->defaultBasePaths as $path) {
+                $attempted[] = $path;
                 if ($this->detectWordPress(getcwd() . DIRECTORY_SEPARATOR . ltrim($path, '/'))) {
                     break;
                 }
             }
         }
-        if (!$this->foundWordPress()) {
-            Cli::error("WordPress installation not found");
-            // @todo report error to API?
+
+        if ($this->foundWordPress()) {
+            $this->data->add('wordpress', $this->wordPressVersion);
+        } else {
+            $message = sprintf('Cannot find WordPress installation in these paths: %s', implode(', ', $attempted));
+            Cli::error($message);
+            $this->data->add('wordpress', null, null, $message);
+            return;
         }
-
-//        $this->bootstapWordPress();
     }
-
 
     /**
      * Detect a WordPress installation and get version
@@ -83,6 +96,7 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
             return false;
         }
 
+        Cli::info(sprintf('Looking for WordPress in %s', $path));
         $includesPath = $path . DIRECTORY_SEPARATOR . 'wp-includes' . DIRECTORY_SEPARATOR;
         if (is_dir($includesPath) && file_exists($includesPath . 'version.php')) {
             require $includesPath . 'version.php';
@@ -94,7 +108,6 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
                     Cli::info("WordPress installation found at $path");
                 }
 
-//                $this->bootstrapWordPress();
                 return true;
             }
         }
@@ -107,17 +120,7 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
      */
     public function foundWordPress()
     {
-        return (!empty($this->wordPressBasePath));
-    }
-
-    /**
-     * Include initial WordPress files so we can access WP data
-     */
-    public function bootstrapWordPress()
-    {
-        if ($this->foundWordPress()) {
-            require $this->wordPressBasePath . DIRECTORY_SEPARATOR . 'wp-load.php';
-        }
+        return (null !== $this->wordPressVersion);
     }
 
     /**
@@ -129,77 +132,57 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
     }
 
    /**
-     * Find and parse plugin names and versions 
+     * Find and parse plugin names and versions
      * @return array
      */
-    public function getPlugins()
+    public function findPlugins()
     {
-        $plugins = [];
-
-        foreach ($this->wordPressPluginPaths as $plugin_dir) {
-
-            if (!file_exists($this->wordPressBasePath . '/' . $plugin_dir)) {
+        // Find plugins in the WordPress installation
+        foreach ($this->defaultPluginPaths as $pluginDir) {
+            if (!file_exists($this->wordPressBasePath . DIRECTORY_SEPARATOR . $pluginDir)) {
                  continue;
             }
 
-            $plugin_root_files = glob($this->wordPressBasePath . '/' . $plugin_dir . '/*/*.php');
-
-            if (is_array($plugin_root_files)) {
-
-                foreach ($plugin_root_files as $file) {
-
+            /**
+             * Find the root plugin PHP file which contains header fields
+             * @see https://developer.wordpress.org/plugins/plugin-basics/header-requirements/
+             */
+            $pluginRootFiles = glob($this->wordPressBasePath . DIRECTORY_SEPARATOR . $pluginDir . '/*/*.php');
+            if (is_array($pluginRootFiles)) {
+                foreach ($pluginRootFiles as $file) {
+                    // Test each root PHP file
                     $contents = file_get_contents($file);
 
                     if (preg_match('/Plugin Name: *(.+)/', $contents, $m) && !empty($m[1])) {
-
                         $name = trim($m[1]);
-                        
-                        preg_match('/^.*\/(.*)\/.*.php$/', $file, $m);
 
-                        if (!empty($m[1])) {
-                            $slug = trim($m[1]);
-                        } else {
-                            $slug = $name;
-                        }
+                        // Detect plugin slug from plugin foldername
+                        $folders = explode('/', dirname($file));
+                        $slug = end($folders);
 
+                        // Detect plugin version
                         preg_match('/Version: *(.+)/', $contents, $m);
-                        
                         if (!empty($m[1])) {
                             $version = trim($m[1]);
+                            $this->data->add($slug, $version, 'wordpress');
                         } else {
-                            $version = 'N/A';
+                            $this->data->add($slug, null, 'wordpress', sprintf('Cannot determine version from plugin file %s', $file));
                         }
-
-                        $plugins[$slug] = [
-                            'slug' => $slug,
-                            'parent' => 'wordpress',
-                            'version' => $version
-                        ];
-
                     }
-
                 }
             }
         }
-
-        return $plugins;
     }
 
     /**
-     * Collect data, should return an array of data
-     * @return array
+     * Collect data
+     * @return VersionCollection
      */
     public function collectData()
     {
+        $this->data = new VersionCollection();
         $this->findWordPress();
-        $plugins = $this->getPlugins();
-
-        $core = [];
-        $core[] = [
-            'slug' => 'wordpress',
-            'version' => $this->getWordPressVersion()
-        ];
-
-        return array_merge($core, $plugins);
+        $this->findPlugins();
+        return $this->data;
     }
 }

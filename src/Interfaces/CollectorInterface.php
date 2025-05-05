@@ -2,22 +2,16 @@
 
 namespace Studio24\Agent\Interfaces;
 
+use Studio24\Agent\Model\VersionCollection;
+
 /**
  * Base data collector interface
  */
 interface CollectorInterface
 {
     /**
-     * Collect data, should return an array of data[slug, parent, version]
-     *
-     * E.g.
-     * return [
-     *     ['slug' => 'wordpress', 'version' => '6.7.2'],
-     *     ['slug' => 'wordpress_seo', 'parent' => 'wordpress', 'version' => '24.9']
-     * ];
-     *
-     * @return array
+     * Collect data
+     * @return VersionCollection Collection of one or more tech version data
      */
     public function collectData();
-
 }

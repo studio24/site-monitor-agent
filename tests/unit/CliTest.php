@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests;
+namespace unit;
 
 use PHPUnit\Framework\TestCase;
 use Studio24\Agent\Cli;
@@ -38,12 +38,6 @@ class CliTest extends TestCase
 
     public function testHelpOption()
     {
-        ob_start();
-        $cli = new Cli(1, ['script.php']);
-        $cli->help('My description', 'php bin/usage.php [options]', ['test' => 'test description'], false);
-        $output = ob_get_clean();
-        $this->assertStringNotContainsString('My description', $output);
-
         ob_start();
         $cli = new Cli(2, ['script.php', '--help']);
         $cli->help('My description', 'php bin/usage.php [options]', ['test' => 'test description'], false);

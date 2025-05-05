@@ -1,13 +1,12 @@
 <?php
 
-namespace Tests;
+namespace unit;
 
 use PHPUnit\Framework\TestCase;
 use Studio24\Agent\Config;
-use Yoast\PHPUnitPolyfills\Polyfills\AssertStringContains;
 
-class ConfigTest extends TestCase {
-
+class ConfigTest extends TestCase
+{
     public function testParseConfig()
     {
         $config = new Config();
@@ -26,5 +25,4 @@ class ConfigTest extends TestCase {
         $this->assertEquals('test', $data['api_key']);
         $this->assertEquals('development', $data['environment']);
     }
-
 }

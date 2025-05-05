@@ -5,22 +5,28 @@ namespace Studio24\Agent;
 use Studio24\Agent\Interfaces\ApplicationInterface;
 use Studio24\Agent\Interfaces\CollectorInterface;
 use Studio24\Agent\Interfaces\VerboseInterface;
+use Studio24\Agent\Model\VersionCollection;
+use Studio24\Agent\Traits\ToJsonTrait;
 use Studio24\Agent\Traits\VerboseTrait;
 
 class Agent
 {
     use VerboseTrait;
+    use ToJsonTrait;
 
     private $siteId = null;
     private $url = null;
     private $environment = null;
     private $gitRepoUrl = null;
-    
+
     private $account = null;
     private $serverName = null;
 
     /** @var CollectorInterface[] */
     private $collectors = [];
+
+    /** @var VersionCollection */
+    private $versions = null;
 
     public function setCollectors($collectors)
     {
@@ -33,7 +39,7 @@ class Agent
                 // @todo report error?
                 continue;
             }
-            if ($collector instanceOf VerboseInterface) {
+            if ($collector instanceof VerboseInterface) {
                 $collector->setVerbose($this->isVerbose());
             }
         }
@@ -138,29 +144,26 @@ class Agent
 
     /**
      * Return array of data collected for this site
-     * @return array
+     * @return void
      */
     public function collectData()
     {
-        $data = [];
+        $this->versions = new VersionCollection();
 
         /** @var CollectorInterface $collector */
         foreach ($this->collectors as $collector) {
-            
             // Get data
             $collectedData = $collector->collectData();
 
-            if (!is_array($collectedData)) {
-                Cli::error(sprintf("Data collector %s::getName() does not return an array", get_class($collector)));
+            if (!($collectedData instanceof VersionCollection)) {
+                Cli::error(sprintf("Data collector %s::collectData() does not return an instance of VersionCollection", get_class($collector)));
                 // @todo report error
                 continue;
             }
 
-            // Add the collected data to the $data array
-            $data[] = $collectedData;
+            $this->versions->merge($collectedData);
 
             // Optionally set environment and URL via collector
-            // @todo is this required?
             if ($collector instanceof ApplicationInterface) {
                 $environment = $collector->getEnvironment();
                 if (is_string($environment) && !empty($environment)) {
@@ -172,32 +175,19 @@ class Agent
                 }
             }
         }
+    }
+
+    /**
+     * Return object as an array
+     * @return array
+     */
+    public function toArray()
+    {
         return [
             'environment'       => $this->getEnvironment(),
             'url'               => $this->getUrl(),
             'repo_url'          => $this->getGitRepoUrl(),
-            'versions'          => $this->flattenData($data),
+            'versions'          => $this->versions->toArray(),
         ];
-    }
-
-    /**
-     * Flatten out arrays of data before passing to the API
-     *
-     * @param array $data
-     * @return array
-     */
-    public function flattenData(array $data): array
-    {
-        $flattened = [];
-        foreach ($data as $item) {
-            if (!empty($item['slug'])) {
-                $flattened[] = $item;
-            } else {
-                foreach ($item as $value) {
-                    $flattened[] = $value;
-                }
-            }
-        }
-        return $flattened;
     }
 }
