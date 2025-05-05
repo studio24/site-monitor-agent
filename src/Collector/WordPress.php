@@ -97,6 +97,7 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
         }
 
         Cli::info(sprintf('Looking for WordPress in %s', $path));
+
         $includesPath = $path . DIRECTORY_SEPARATOR . 'wp-includes' . DIRECTORY_SEPARATOR;
         if (is_dir($includesPath) && file_exists($includesPath . 'version.php')) {
             /** @link https://github.com/WordPress/WordPress/blob/master/wp-includes/version.php */
@@ -105,7 +106,7 @@ class WordPress implements CollectorInterface, VerboseInterface, ApplicationInte
                 $this->wordPressVersion = $wp_version;
                 $this->wordPressBasePath = $path;
 
-                Cli::info("WordPress installation found at $path");
+                Cli::info(sprintf("WordPress %s installation found at %s", $wp_version, $path));
                 return true;
             }
         }
