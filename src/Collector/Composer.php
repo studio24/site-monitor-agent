@@ -5,31 +5,28 @@ namespace Studio24\Agent\Collector;
 use Composer\InstalledVersions;
 use Studio24\Agent\Interfaces\CollectorInterface;
 use Studio24\Agent\Model\VersionCollection;
+use Studio24\Agent\Traits\ExecTrait;
 
 class Composer implements CollectorInterface
 {
-    /** @var string|null */
-    private $parentSlug = null;
+    use ExecTrait;
 
     /** @var VersionCollection */
     private $data;
 
     private $basePath = './';
     private $exclude = [];
+    private $composerTree = [];
 
     /**
      * Constructor
-     * @param string|null $basePath
-     * @param string|null $parentSlug
+     * @param string|null $basePath Base path to composer.json and vendor folder
      */
-    public function __construct($basePath = null, $parentSlug = null)
+    public function __construct($basePath = null)
     {
         if (null !== $basePath) {
             $this->loadComposerAutoloader($basePath);
             $this->basePath = $basePath;
-        }
-        if (null !== $parentSlug) {
-            $this->parentSlug = $parentSlug;
         }
     }
 
@@ -88,36 +85,18 @@ class Composer implements CollectorInterface
      * @param bool $includeAll
      * @return array
      */
-    protected function getDependencies($includeAll = true)
+    protected function getDependencies()
     {
-        // This returns all dependencies, including dependencies of dependencies.
-        // Setting $includeAll to false strips out all dependencies that are not
-        // mentioned in the composer.json file.
-
-        $installedDependencies = InstalledVersions::getInstalledPackages();
-        $dependenciesFromComposerJson = $this->getDependenciesFromJson();
-
         $data = [];
-        foreach ($installedDependencies as $name) {
+        foreach (InstalledVersions::getInstalledPackages() as $name) {
             if (in_array($name, $this->exclude)) {
                 continue;
             }
-            if (!$includeAll) {
-                // We'll check if the installed package was mentioned in composer.json
-                $include = false;
-                foreach ($dependenciesFromComposerJson as $jsonDependency) {
-                    if ($jsonDependency['slug'] === $name) {
-                        $include = true;
-                    }
-                }
-
-                // If it wasn't, skip it.
-                if (!$include) {
-                    continue;
-                }
+            if ($this->isPlatformDependency($name)) {
+                continue;
             }
 
-            $this->data->add($name, InstalledVersions::getVersion($name), $this->parentSlug);
+            $this->data->add($name, InstalledVersions::getVersion($name), $this->getParent($name));
         }
     }
 
@@ -157,4 +136,100 @@ class Composer implements CollectorInterface
 
         return $data;
     }
+
+    /**
+     * Is the Composer package a platform dependency?
+     *
+     * @param $name
+     * @return bool
+     */
+    public function isPlatformDependency($name)
+    {
+        $name = strtolower($name);
+        if (in_array($name, ['php', 'hhvm', 'php-64bit'])) {
+            return true;
+        }
+        if (preg_match('/^(ext|lib)\-.+$/', $name)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Return Composer packages in a dependency tree
+     *
+     * @return void
+     * @throws \Studio24\Agent\Exception\CommandException
+     */
+    public function getComposerTree()
+    {
+        $json = $this->exec('composer', 'show --tree --format=json', null, $this->basePath);
+        $data = json_decode($json, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \RuntimeException(sprintf('Error decoding JSON from composer show --tree: %s', json_last_error_msg()));
+        }
+        if (!isset($data["installed"]) || !is_array($data["installed"])) {
+            throw new \RuntimeException('installed data not found in composer show --tree JSON');
+        }
+
+        $this->processTreeDependencies($data["installed"]);
+        return $this->composerTree;
+    }
+
+    /**
+     * Process dependencies of a package tree and organizes them by parent-child relationships.
+     *
+     * @param array $requires List of dependencies to process.
+     * @param string|null $parent Name of the parent package, or null for the root.
+     * @return void
+     */
+    protected function processTreeDependencies($requires, $parent = null)
+    {
+        foreach ($requires as $item) {
+            if (!isset($item["name"])) {
+                continue;
+            }
+            $name = $item["name"];
+            if ($this->isPlatformDependency($name)) {
+                continue;
+            }
+
+            // Store package name with parent/s
+            if (!empty($this->composerTree[$name])) {
+                if (strpos($this->composerTree[$name], $parent) !== false) {
+                    continue;
+                }
+                $this->composerTree[$name] .= ',' . $parent;
+            } else {
+                $this->composerTree[$name] = $parent;
+            }
+
+            // Process children
+            if (isset($item["requires"]) && is_array($item["requires"])) {
+                $this->processTreeDependencies($item["requires"], $name);
+            }
+        }
+    }
+
+    /**
+     * Retrieve the parent package/s for a given Composer package
+     *
+     * @param string $name
+     * @return string|null List of parent packages, separated by comma
+     */
+    public function getParent($name)
+    {
+        // Lazy load composer tree
+        if ($this->composerTree === []) {
+            $this->getComposerTree();
+        }
+
+        if (isset($this->composerTree[$name])) {
+            return $this->composerTree[$name];
+        }
+        return null;
+    }
+
 }

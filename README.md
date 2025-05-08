@@ -3,6 +3,8 @@ Agent to send data to the [Studio 24 site monitoring tool](https://github.com/st
 
 See [documentation](docs/README.md).
 
+[![PHP tests](https://github.com/studio24/site-monitor-agent/actions/workflows/php.yml/badge.svg)](https://github.com/studio24/site-monitor-agent/actions/workflows/php.yml)
+
 ## Requirements
 * PHP 5.6 to 8.4
 * [Composer](https://getcomposer.org/)
