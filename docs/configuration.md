@@ -51,3 +51,5 @@ The base URL of the API to send data to.
 ## Data collectors
 
 Data collectors are setup via the `collectors` option. 
+
+For software using Composer, you can just use the Composer collector.

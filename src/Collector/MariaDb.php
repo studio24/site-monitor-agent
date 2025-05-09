@@ -2,14 +2,12 @@
 
 namespace Studio24\Agent\Collector;
 
+use Studio24\Agent\Exec;
 use Studio24\Agent\Interfaces\CollectorInterface;
 use Studio24\Agent\Model\VersionCollection;
-use Studio24\Agent\Traits\ExecTrait;
 
 class MariaDb implements CollectorInterface
 {
-    use ExecTrait;
-
     /**
      * Collect data
      * @return VersionCollection
@@ -17,7 +15,7 @@ class MariaDb implements CollectorInterface
     public function collectData()
     {
         $data = new VersionCollection();
-        $output = $this->exec('mariadbd', '-V');
+        $output = Exec::exec('mariadbd', '-V');
 
         /**
          * /usr/sbin/mariadbd  Ver 10.11.11-MariaDB-0+deb12u1 for debian-linux-gnu on x86_64 (Debian 12)

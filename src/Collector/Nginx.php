@@ -2,14 +2,12 @@
 
 namespace Studio24\Agent\Collector;
 
+use Studio24\Agent\Exec;
 use Studio24\Agent\Interfaces\CollectorInterface;
 use Studio24\Agent\Model\VersionCollection;
-use Studio24\Agent\Traits\ExecTrait;
 
 class Nginx implements CollectorInterface
 {
-    use ExecTrait;
-
     /**
      * Collect data
      * @return VersionCollection
@@ -17,7 +15,7 @@ class Nginx implements CollectorInterface
     public function collectData()
     {
         $data = new VersionCollection();
-        $output = $this->exec('nginx', '-v');
+        $output = Exec::exec('nginx', '-v');
 
         /**
          * nginx version: nginx/1.22.1

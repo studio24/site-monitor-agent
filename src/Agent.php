@@ -188,6 +188,8 @@ class Agent
             'url'               => $this->getUrl(),
             'repo_url'          => $this->getGitRepoUrl(),
             'versions'          => $this->versions->toArray(),
+            'account'           => $this->getAccount(),
+            'server'            => $this->getServerName(),
         ];
     }
 }

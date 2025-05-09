@@ -14,10 +14,10 @@ See [documentation](docs/README.md).
 See [installation](docs/installation.md).
 
 ## TODO
-- [ ] Add Symfony collector
-- [ ] Add Sylius collector 
+- [ ] Do we need a version type? E.g. composer, node, etc
 - [ ] Set aliases for a website (config)
 - [ ] Set redirect URLs for a website (config)
+- [ ] Collect Node package versions
 
 ## Usage
 
@@ -48,9 +48,8 @@ We expect to use this to collect data on things like:
 * Drupal version
 * Craft CMS version
 * Laravel version
-* Composer packages?
+* Composer packages
 * Node version
-* SSL certificates
 
 ## Tests
 

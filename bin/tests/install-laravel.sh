@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ####################################################################
-# Install Laravel files so we can test the Laravel collector
+# Install Laravel files so we can test Laravel works with the Composer collector
 #
 # Usage:
 # install-laravel.sh path/to/folder

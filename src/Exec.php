@@ -1,10 +1,10 @@
 <?php
 
-namespace Studio24\Agent\Traits;
+namespace Studio24\Agent;
 
 use Studio24\Agent\Exception\CommandException;
 
-trait ExecTrait
+class Exec
 {
     /**
      * Execute a server command and return the output
@@ -15,7 +15,7 @@ trait ExecTrait
      * @param $cd Change directory before running command
      * @return string|null The entire output of the command
      */
-    public function exec($command, $arguments = null, $path = null, $cd = null)
+    public static function exec($command, $arguments = null, $path = null, $cd = null)
     {
         // Set path to run command from
         $defaultLocations = [

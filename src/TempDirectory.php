@@ -3,12 +3,9 @@
 namespace Studio24\Agent;
 
 use Studio24\Agent\Exception\FailedTempDirectoryException;
-use Studio24\Agent\Traits\ExecTrait;
 
 class TempDirectory
 {
-    use ExecTrait;
-
     const TMP_FOLDER = 'SiteMonitorAgent';
 
     /** @var string|null */
@@ -59,6 +56,6 @@ class TempDirectory
 
     public function deleteTempDirectory($name)
     {
-        $this->exec('rm', sprintf('-Rf %s', $this->getFullPath($name)));
+        Exec::exec('rm', sprintf('-Rf %s', $this->getFullPath($name)));
     }
 }

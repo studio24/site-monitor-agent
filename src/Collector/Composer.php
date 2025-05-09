@@ -3,14 +3,12 @@
 namespace Studio24\Agent\Collector;
 
 use Composer\InstalledVersions;
+use Studio24\Agent\Exec;
 use Studio24\Agent\Interfaces\CollectorInterface;
 use Studio24\Agent\Model\VersionCollection;
-use Studio24\Agent\Traits\ExecTrait;
 
 class Composer implements CollectorInterface
 {
-    use ExecTrait;
-
     /** @var VersionCollection */
     private $data;
 
@@ -101,43 +99,6 @@ class Composer implements CollectorInterface
     }
 
     /**
-     * Lookup dependencies from composer.json
-     * @return array
-     */
-    protected function getDependenciesFromJson()
-    {
-        if (!$composer = file_get_contents($this->basePath . DIRECTORY_SEPARATOR . 'composer.json')) {
-            return [];
-        }
-
-        $json = json_decode($composer, true);
-
-        if (isset($json['require'])) {
-            $dependencies = $json['require'];
-        } else {
-            $dependencies = [];
-        }
-
-
-        $data = [];
-        foreach ($dependencies as $name => $version) {
-            // Require something/something format.
-            // Excludes "php" version dependency which is not a package.
-            if (!preg_match('/^.*?\/.*?$/', $name, $matches)) {
-                continue;
-            }
-
-            $data[] = [
-                'slug' => $name,
-                'parent' => $this->parentSlug,
-                'version' => $version
-            ];
-        }
-
-        return $data;
-    }
-
-    /**
      * Is the Composer package a platform dependency?
      *
      * @param $name
@@ -164,7 +125,7 @@ class Composer implements CollectorInterface
      */
     public function getComposerTree()
     {
-        $json = $this->exec('composer', 'show --tree --format=json', null, $this->basePath);
+        $json = Exec::exec('composer', 'show --tree --format=json', null, $this->basePath);
         $data = json_decode($json, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
@@ -231,5 +192,4 @@ class Composer implements CollectorInterface
         }
         return null;
     }
-
 }

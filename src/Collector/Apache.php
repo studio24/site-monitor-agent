@@ -2,14 +2,12 @@
 
 namespace Studio24\Agent\Collector;
 
+use Studio24\Agent\Exec;
 use Studio24\Agent\Interfaces\CollectorInterface;
 use Studio24\Agent\Model\VersionCollection;
-use Studio24\Agent\Traits\ExecTrait;
 
 class Apache implements CollectorInterface
 {
-    use ExecTrait;
-
     /**
      * Collect data
      * @return VersionCollection
@@ -17,7 +15,7 @@ class Apache implements CollectorInterface
     public function collectData()
     {
         $data = new VersionCollection();
-        $output = $this->exec('apache2', '-v');
+        Exec::exec('apache2', '-v');
 
         /**
          * Server version: Apache/2.4.62 (Debian)

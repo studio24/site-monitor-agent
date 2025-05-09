@@ -2,14 +2,12 @@
 
 namespace Studio24\Agent\Collector;
 
+use Studio24\Agent\Exec;
 use Studio24\Agent\Interfaces\CollectorInterface;
 use Studio24\Agent\Model\VersionCollection;
-use Studio24\Agent\Traits\ExecTrait;
 
 class MySQL implements CollectorInterface
 {
-    use ExecTrait;
-
     /**
      * Collect data
      * @return VersionCollection
@@ -17,7 +15,7 @@ class MySQL implements CollectorInterface
     public function collectData()
     {
         $data = new VersionCollection();
-        $output = $this->exec('mysql', '-V');
+        $output = Exec::exec('mysql', '-V');
 
         /**
          * mysql  Ver 14.14 Distrib 5.7.44, for Linux (x86_64) using  EditLine wrapper
