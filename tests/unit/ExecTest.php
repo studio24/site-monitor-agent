@@ -14,7 +14,7 @@ class ExecTest extends TestCase
     public function testExec()
     {
         $output = Exec::exec('ls', __DIR__);
-        $this->assertStringContainsString('ExecTraitTest.php', $output);
+        $this->assertStringContainsString('ExecTest.php', $output);
     }
 
     public function testMissing()
