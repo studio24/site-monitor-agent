@@ -89,7 +89,7 @@ if ($send) {
     
     */
 
-    $response = $httpClient->sendData($agent->toJson());
+    $response = $httpClient->sendData($agent);
 
     echo 'Response: ' . $response->getBody() . PHP_EOL;
 }

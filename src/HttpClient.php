@@ -61,14 +61,14 @@ class HttpClient
      *   - version
      *   - parent
      *
-     * @param array $data
+     * @param Agent $data
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function sendData($data)
     {
-        $this->throwIfNotArray('data', $data);
+        $this->throwIfNotInstanceOf(Agent::class, 'data', $data);
         $response = $this->client->request('POST', self::API_SEND_DATA_URL, [
-            'json' => $data
+            'json' => $data->toJson()
         ]);
 
         if ($response->getStatusCode() !== 200) {
