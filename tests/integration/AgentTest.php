@@ -34,7 +34,7 @@ class AgentTest extends AgentTestCase
         $this->assertEquals('servername.studio24.net', $data['server']);
 
         $versions = [];
-        array_walk($data['versions'], function($value) use (&$versions) {
+        array_walk($data['versions'], function ($value) use (&$versions) {
             $versions[] = $value['slug'];
         });
         $this->assertTrue(in_array('php', $versions));
