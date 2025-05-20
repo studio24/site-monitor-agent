@@ -32,7 +32,7 @@ class WordPressTest extends AgentTestCase
     protected function tearDownFixtures()
     {
         // Any clean up needed related to `setUpFixtures()`.
-        $this->temp->deleteTempDirectory('wordpress');
+        //$this->temp->deleteTempDirectory('wordpress');
 
         parent::tearDownFixtures();
     }

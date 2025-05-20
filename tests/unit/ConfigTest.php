@@ -25,4 +25,13 @@ class ConfigTest extends TestCase
         $this->assertEquals('test', $data['api_key']);
         $this->assertEquals('development', $data['environment']);
     }
+
+    public function testEnvConfig()
+    {
+        // @todo test .env with quote marks!
+        putenv('API_KEY="test"');
+        $data = $config->parseTokens(__DIR__ . '/config-test', $data);
+        $this->assertEquals('test', $data['api_key']);
+    }
+
 }

@@ -4,6 +4,7 @@ namespace Studio24\Agent;
 
 use Studio24\Agent\Exception\InvalidConfigException;
 use Studio24\Agent\Traits\VerboseTrait;
+use Studio24\Agent\Interfaces\CollectorInterface;
 
 class Config
 {
@@ -35,6 +36,7 @@ class Config
 
     /** @var array */
     private $config = null;
+    private $loadedConfigFile = null;
 
     /**
      * @param array $paths Any other paths to load the config file from
@@ -95,6 +97,7 @@ class Config
                 if (!is_array($this->config)) {
                     throw new InvalidConfigException('Config file must only return an array');
                 }
+                $this->loadedConfigFile = $filepath;
 
                 $this->config = $this->parseTokens(dirname($filepath), $this->config);
 
@@ -152,7 +155,7 @@ class Config
                 // Check .env file
                 if ($envFile !== false) {
                     if (preg_match('/^' . $token . '=(.+)$/m', $envFile, $m)) {
-                        $data[$name] = trim($m[1]);
+                        $data[$name] = trim($m[1], " \n\r\t\v\0\"");
                     }
                 }
             }
@@ -160,6 +163,10 @@ class Config
         return $data;
     }
 
+    public function getLoadedConfigFile()
+    {
+        return $this->loadedConfigFile;
+    }
 
     /**
      * @param $name
@@ -192,5 +199,21 @@ class Config
     public function __get($name)
     {
         return $this->get($name);
+    }
+
+    /**
+     * Return config as a JSON respresentation
+     * @return string
+     */
+    public function getJson()
+    {
+        $config = $this->getConfig();
+        $collectors = [];
+        /** @var CollectorInterface $collector */
+        foreach ($config["collectors"] as $key => $collector) {
+            $collectors[] = get_class($collector);
+        }
+        $config["collectors"] = $collectors;
+        return json_encode($config, JSON_PRETTY_PRINT);
     }
 }

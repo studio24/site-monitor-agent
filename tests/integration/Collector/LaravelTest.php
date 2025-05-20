@@ -35,7 +35,7 @@ class LaravelTest extends AgentTestCase
     protected function tearDownFixtures()
     {
         // Any clean up needed related to `setUpFixtures()`.
-        $this->temp->deleteTempDirectory('laravel');
+        //$this->temp->deleteTempDirectory('laravel');
 
         parent::tearDownFixtures();
     }

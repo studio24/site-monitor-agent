@@ -18,31 +18,5 @@
         "yoast/phpunit-polyfills": "^1.0",
         "phpunit/phpunit": "^5.7.27 || ^6.5.14 || ^7.5.20 || ^8.5.8 || ^9.5"
     },
-    "bin": ["bin/agent.php"],
-    "scripts": {
-        "lint": [
-            "./vendor/bin/phplint"
-        ],
-        "cs":  [
-            "./vendor/bin/phpcs"
-        ],
-        "fix":  [
-            "./vendor/bin/phpcbf"
-        ],
-        "unit": [
-            "./vendor/bin/phpunit"
-        ],
-        "test": [
-            "composer lint",
-            "composer cs",
-            "composer unit"
-        ]
-    },
-    "scripts-descriptions": {
-        "lint": "Lint PHP files",
-        "cs": "Test coding standards are met in PHP code",
-        "fix": "Fix PHP code so it meets coding standards",
-        "unit": "Run PHPUnit tests",
-        "test": "Run all tests (phplint, phpcs, phpunit)"
-    }
+    "bin": ["bin/agent.php"]
 }
