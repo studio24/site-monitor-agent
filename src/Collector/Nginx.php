@@ -20,7 +20,7 @@ class Nginx implements CollectorInterface
         /**
          * nginx version: nginx/1.22.1
          */
-        if (preg_match('!nginx/(\d+\.\d+\.\d+)!', $output, $m)) {
+        if (preg_match('/nginx\/(\d+\.\d+\.\d+)/', $output, $m)) {
             $data->add('nginx', $m[1]);
         } else {
             $data->add('nginx', null, null, sprintf('Cannot determine version from output: %s', $output));

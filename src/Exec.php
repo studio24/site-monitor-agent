@@ -41,8 +41,8 @@ class Exec
                     chdir($cd);
                 }
 
-                // Run command
-                exec(escapeshellcmd($command), $output, $resultCode);
+                // Run command, forcing output to go to standard output
+                exec(escapeshellcmd($command) . ' 2>&1', $output, $resultCode);
 
                 // Switch CD back
                 if ($cd !== null) {
