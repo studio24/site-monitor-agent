@@ -99,12 +99,13 @@ if ($ping) {
 if ($collect) {
     echo sprintf("Collecting data for site ID %s", $config->siteId) . PHP_EOL;
     $agent->collectData();
-    echo $agent->toJson(true) . PHP_EOL;
+    if (!$send) {
+        echo $agent->toJson(true) . PHP_EOL;
+    }
 }
 
 // Send data
 if ($send) {
-    echo sprintf("Sending data to API endpoint %s", $config->apiBaseUrl) . PHP_EOL;
     $response = $httpClient->sendData($agent);
     echo 'Response: ' . $response->getBody() . PHP_EOL;
 } else {

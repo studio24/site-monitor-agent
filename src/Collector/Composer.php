@@ -93,8 +93,11 @@ class Composer implements CollectorInterface
             if ($this->isPlatformDependency($name)) {
                 continue;
             }
-
-            $this->data->add($name, InstalledVersions::getVersion($name), $this->getParent($name));
+            $version = InstalledVersions::getVersion($name);
+            if (null === $version) {
+                continue;
+            }
+            $this->data->add($name, $version, $this->getParent($name));
         }
     }
 

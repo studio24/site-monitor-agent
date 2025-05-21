@@ -185,11 +185,9 @@ class Agent
     {
         return [
             'environment'       => $this->getEnvironment(),
-            'url'               => $this->getUrl(),
             'repo_url'          => $this->getGitRepoUrl(),
+            'url'               => $this->getUrl(),
             'versions'          => $this->versions->toArray(),
-            'account'           => $this->getAccount(),
-            'server'            => $this->getServerName(),
         ];
     }
 }

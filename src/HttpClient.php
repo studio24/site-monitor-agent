@@ -4,6 +4,9 @@ namespace Studio24\Agent;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
 use Psr\Http\Message\ResponseInterface;
 use Studio24\Agent\Exception\FailedHttpRequestException;
 use Studio24\Agent\Traits\TypeTrait;
@@ -33,11 +36,11 @@ class HttpClient
          * @see https://docs.guzzlephp.org/en/latest/request-options.html
          */
         $this->setClient(new Client([
-            'verify' => false, // Required for DDEV SSL certs
             'base_uri' => $endpointUrl,
             'headers' => [
                 'Authorization' => "Bearer {$authToken}",
                 'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
                 'User-Agent' => Version::getUserAgent(),
             ],
         ]));
@@ -86,7 +89,7 @@ class HttpClient
     {
         $this->throwIfNotInstanceOf(Agent::class, 'data', $data);
         $response = $this->request('POST', self::API_SEND_DATA_URL, [
-            'json' => $data->toJson()
+            'body' => $data->toJson()
         ]);
 
         if ($response->getStatusCode() !== 200) {
@@ -115,7 +118,7 @@ class HttpClient
         ]);
 
         if ($response->getStatusCode() !== 200) {
-            throw new FailedHttpRequestException(sprintf('Failed to send sendData HTTP request, error %s', $response->getStatusCode() . ' ' . $response->getReasonPhrase()));
+            throw new FailedHttpRequestException(sprintf('Failed to send sendDeployment HTTP request, error %s', $response->getStatusCode() . ' ' . $response->getReasonPhrase()));
         }
 
         return $response;
@@ -130,20 +133,37 @@ class HttpClient
      * @return ResponseInterface
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function request(string $method, $uri = '', array $options = [])
+    public function request($method, $uri = '', $options = [])
     {
+        $request = sprintf("%s %s", $method, $uri);
+        echo sprintf("Sending data: %s", $request) . PHP_EOL;
+
+        // Verbose mode
         if ($this->isVerbose()) {
-            echo sprintf("%s %s", $method, $uri) . PHP_EOL;
-            if (!empty($options["json"])) {
-                echo sprintf("JSON data:", $options["json"]) . PHP_EOL;
-                unset($options["json"]);
+            echo $request . PHP_EOL;
+            $json = null;
+            if (!empty($options['json'])) {
+                $json = sprintf("JSON data: %s", $options['json']) . PHP_EOL;
+                unset($options['json']);
             }
             if (!empty($options)) {
                 echo "Options:" . PHP_EOL;
                 echo json_encode($options, JSON_PRETTY_PRINT) . PHP_EOL;
             }
+            if (!empty($json)) {
+                echo $json;
+            }
         }
-        return $this->client->request($method, $uri, $options);
+
+        // Send request
+        try {
+            return $this->client->request($method, $uri, $options);
+        } catch (BadResponseException $e) {
+            $status = $e->getResponse()->getStatusCode();
+            $reason = $e->getResponse()->getReasonPhrase();
+            $body = $e->getResponse()->getBody()->getContents();
+            throw new FailedHttpRequestException(sprintf('Failed HTTP response for %s, HTTP status %d %s, body: %s', $request, $status, $reason, $body));
+        }
     }
 
 }
