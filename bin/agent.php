@@ -84,6 +84,9 @@ $agent->setUrl($config->url);
 $agent->setAccount($config->account);
 $agent->setServerName($config->serverName);
 
+if ($verbose) {
+    echo sprintf("Collecting data to send to API: %s", $config->apiBaseUrl) . PHP_EOL;
+}
 $httpClient = new HttpClient($config->apiBaseUrl, $config->apiToken);
 $httpClient->setVerbose($verbose);
 
@@ -97,7 +100,6 @@ if ($ping) {
 
 // Collect data
 if ($collect) {
-    echo sprintf("Collecting data for site ID %s", $config->siteId) . PHP_EOL;
     $agent->collectData();
     if (!$send) {
         echo $agent->toJson(true) . PHP_EOL;

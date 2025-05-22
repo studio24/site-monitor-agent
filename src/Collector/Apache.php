@@ -15,7 +15,7 @@ class Apache implements CollectorInterface
     public function collectData()
     {
         $data = new VersionCollection();
-        Exec::exec('apache2', '-v');
+        $output = Exec::exec('apache2', '-v');
 
         /**
          * Server version: Apache/2.4.62 (Debian)
