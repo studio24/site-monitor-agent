@@ -14,7 +14,8 @@ use Studio24\Agent\Traits\VerboseTrait;
 
 class HttpClient
 {
-    use TypeTrait, VerboseTrait;
+    use TypeTrait;
+    use VerboseTrait;
 
     const API_PING_URL = '/api/v1/ping';
     const API_SEND_DATA_URL = '/api/v1/update';
@@ -165,5 +166,4 @@ class HttpClient
             throw new FailedHttpRequestException(sprintf('Failed HTTP response for %s, HTTP status %d %s, body: %s', $request, $status, $reason, $body));
         }
     }
-
 }

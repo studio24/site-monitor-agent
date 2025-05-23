@@ -3,14 +3,13 @@
 namespace Studio24\Agent\Collector;
 
 return [
-    'apiBaseUrl'    => 'https://site-monitor.ddev.site/api/v1',
-    'apiToken'      => '%MONITOR_API_TOKEN%',
-    'environment'   => '%ENVIRONMENT%',
+    'apiBaseUrl'    => 'https://ddev-site-monitor-web/',
+    'apiToken'      => '%SITE_MONITOR_TOKEN%',
+    'environment'   => '%SITE_MONITOR_ENVIRONMENT%',
+    'url'           => '%SITE_MONITOR_URL%',
     'gitRepoUrl'    => 'https://github.com/studio24/site-monitor-agent',
-    'url'           => '%MONITOR_URL%',
     'collectors'    => [
         new Php(),
         new Composer(),
-        new Wordpress(),
      ],
 ];

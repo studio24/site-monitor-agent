@@ -51,4 +51,11 @@ class ComposerFoldersTest extends AgentTestCase
         $this->assertTrue($this->slugExists($data, 'league/route'));
         $this->assertTrue($this->versionGreaterOrEqual('3.1.0', $this->getVersionBySlug($data, 'league/route')));
     }
+
+    public function testIgnoreRootPackage()
+    {
+        $collector = new Composer();
+        $data = $collector->collectData();
+        $this->assertFalse($this->slugExists($data, '__root__'));
+    }
 }

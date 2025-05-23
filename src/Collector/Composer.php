@@ -13,7 +13,9 @@ class Composer implements CollectorInterface
     private $data;
 
     private $basePath = './';
-    private $exclude = [];
+    private $exclude = [
+        '__root__'
+    ];
     private $composerTree = [];
 
     /**
