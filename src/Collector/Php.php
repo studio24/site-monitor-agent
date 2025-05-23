@@ -2,25 +2,19 @@
 
 namespace Studio24\Agent\Collector;
 
+use Studio24\Agent\Interfaces\CollectorInterface;
+use Studio24\Agent\Model\VersionCollection;
+
 class Php implements CollectorInterface
 {
     /**
-     * Return collector name
-     * @return string
-     */
-    public function getName()
-    {
-        return 'PHP';
-    }
-
-    /**
-     * Collect data, should return an array of data
-     * @return array
+     * Collect data
+     * @return VersionCollection
      */
     public function collectData()
     {
-        return [
-            'version' => phpversion()
-        ];
+        $data = new VersionCollection();
+        $data->add('php', phpversion());
+        return $data;
     }
 }

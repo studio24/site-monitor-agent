@@ -3,15 +3,19 @@
 namespace Studio24\Agent;
 
 use Studio24\Agent\Exception\InvalidConfigException;
+use Studio24\Agent\Traits\VerboseTrait;
+use Studio24\Agent\Interfaces\CollectorInterface;
 
 class Config
 {
+    use VerboseTrait;
+
     const CONFIG_FILENAME = 'agent-config.php';
 
     /** @var array */
     private $expected = [
         'string' => [
-            'apiBaseUrl', 'apiToken', 'siteId', 'environment', 'gitRepoUrl'
+            'apiBaseUrl', 'apiToken', 'environment', 'gitRepoUrl'
         ],
         'array' => [
             'collectors'
@@ -20,9 +24,11 @@ class Config
 
     /** @var string[] */
     private $paths = [
-        '../../../../',
+        './',
         '../',
         '../config/',
+        './config/',
+        '../../../../',
     ];
 
     /** @var string */
@@ -30,6 +36,7 @@ class Config
 
     /** @var array */
     private $config = null;
+    private $loadedConfigFile = null;
 
     /**
      * @param array $paths Any other paths to load the config file from
@@ -83,11 +90,19 @@ class Config
 
         $tried = [];
         foreach ($this->paths as $path) {
-            $filepath = __DIR__ . '/' . trim($path, '/') . '/' . self::CONFIG_FILENAME;
-            if (file_exists($filepath)) {
+            $filepath = getcwd() . '/' . trim($path, '/') . '/' . self::CONFIG_FILENAME;
+            $filepath = realpath($filepath);
+            if ($filepath !== false && file_exists($filepath)) {
                 $this->config = include($filepath);
                 if (!is_array($this->config)) {
                     throw new InvalidConfigException('Config file must only return an array');
+                }
+                $this->loadedConfigFile = $filepath;
+
+                $this->config = $this->parseTokens(dirname($filepath), $this->config);
+
+                if ($this->isVerbose()) {
+                    Cli::info("Config file loaded from $filepath");
                 }
             }
             $tried[] = $filepath;
@@ -98,6 +113,59 @@ class Config
         if (empty($this->config)) {
             throw new InvalidConfigException('Cannot load config file or config array is empty');
         }
+    }
+
+    /**
+     * Parse any tokens in a config data array and return the parsed data array
+     *
+     * @param string $path Path to load .env file from
+     * @param array $data Data array
+     * @return array Parsed data array
+     */
+    public function parseTokens($path, $data)
+    {
+        // Load .env file
+        $envPath = $path . DIRECTORY_SEPARATOR . '.env';
+        $envFile = false;
+        if (file_exists($envPath)) {
+            $envFile = file_get_contents($envPath);
+            if ($envFile === false) {
+                Cli::error('Cannot load .env file from ' . $envPath);
+            }
+        } else {
+            Cli::error('Not exists .env file from ' . $envPath);
+        }
+
+        foreach ($data as $name => $value) {
+            // Skip the collectors array.
+            if (is_array($value)) {
+                continue;
+            }
+
+            if (preg_match('/^%(.+)%$/', $value, $m)) {
+                $token = $m[1];
+
+                // Check environment variable
+                $env = getenv($token);
+                if ($env !== false) {
+                    $data[$name] = $env;
+                    continue;
+                }
+
+                // Check .env file
+                if ($envFile !== false) {
+                    if (preg_match('/^' . $token . '=(.+)$/m', $envFile, $m)) {
+                        $data[$name] = trim($m[1], " \n\r\t\v\0\"");
+                    }
+                }
+            }
+        }
+        return $data;
+    }
+
+    public function getLoadedConfigFile()
+    {
+        return $this->loadedConfigFile;
     }
 
     /**
@@ -131,5 +199,21 @@ class Config
     public function __get($name)
     {
         return $this->get($name);
+    }
+
+    /**
+     * Return config as a JSON respresentation
+     * @return string
+     */
+    public function getJson()
+    {
+        $config = $this->getConfig();
+        $collectors = [];
+        /** @var CollectorInterface $collector */
+        foreach ($config["collectors"] as $key => $collector) {
+            $collectors[] = get_class($collector);
+        }
+        $config["collectors"] = $collectors;
+        return json_encode($config, JSON_PRETTY_PRINT);
     }
 }
