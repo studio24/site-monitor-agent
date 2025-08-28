@@ -93,7 +93,7 @@ $httpClient->setVerbose($verbose);
 // Ping
 if ($ping) {
     echo 'Ping...' . PHP_EOL;
-    $response = $httpClient->ping();
+    $response = $httpClient->get('ping');
     echo 'Response: ' . $response->getBody() . PHP_EOL;
     exit(Cli::SUCCESS);
 }
@@ -108,7 +108,7 @@ if ($collect) {
 
 // Send data
 if ($send) {
-    $response = $httpClient->sendData($agent);
+    $response = $httpClient->post('update', $agent->toJson());
     echo 'Response: ' . $response->getBody() . PHP_EOL;
 } else {
     echo "Dry run mode" . PHP_EOL;

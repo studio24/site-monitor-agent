@@ -2,168 +2,183 @@
 
 namespace Studio24\Agent;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ServerException;
-use Psr\Http\Message\ResponseInterface;
-use Studio24\Agent\Exception\FailedHttpRequestException;
+use Studio24\Agent\Exception\HttpException;
+use Studio24\Agent\Exception\HttpNetworkException;
+use Studio24\Agent\Exception\HttpRequestException;
+use Studio24\Agent\Exception\JsonDecodeException;
 use Studio24\Agent\Traits\TypeTrait;
 use Studio24\Agent\Traits\VerboseTrait;
 
+/**
+ * Basic HTTP client using cURL
+ */
 class HttpClient
 {
     use TypeTrait;
     use VerboseTrait;
 
-    const API_PING_URL = '/api/v1/ping';
-    const API_SEND_DATA_URL = '/api/v1/update';
-    const API_SEND_DEPLOYMENT_URL = '/api/v1/deployment';
+    private $baseUri;
+    private $headers;
+    private $handle;
 
-    /** @var Client */
-    private $client;
+    /**
+     * Set CURL default options
+     * @link https://www.php.net/manual/en/curl.constants.php
+     */
+    private $curlDefaults = [
+        CURLOPT_HEADER => false,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => false,
+        CURLOPT_TIMEOUT => 10
+    ];
 
     /**
      * Constructor
+     *
+     * @param string $baseUri Base URL of API
+     * @param ?string $authToken API authentication token
+     */
+    public function __construct($baseUri, $authToken = null)
+    {
+        $this->throwIfNotString('baseUri', $baseUri);
+        $this->throwIfEmpty('baseUri', $baseUri);
+        $this->throwIfNotString('authToken', $authToken);
+
+        $this->baseUri = rtrim($baseUri, '/');
+        $this->headers = [
+            'Accept: application/json',
+            'Content-Type: application/json',
+            'User-Agent: ' . Version::getUserAgent(),
+        ];
+        if (null !== $authToken) {
+            $this->headers[] = 'Authorization: Bearer ' . $authToken;
+        }
+    }
+
+    public function __destruct()
+    {
+        if (is_resource($this->handle) || is_a($this->handle, 'CURLHandle')) {
+            curl_close($this->handle);
+        }
+    }
+
+    /**
+     * Build URL from base URL and endpoint
      * @param string $endpointUrl
-     * @param string $authToken
+     * @return string
      */
-    public function __construct($endpointUrl, $authToken, $basicAuth = null)
+    public function buildUrl($endpointUrl)
     {
-        /**
-         * Set default client
-         * @see https://docs.guzzlephp.org/en/6.5/request-options.html
-         * @see https://docs.guzzlephp.org/en/latest/request-options.html
-         */
-        $this->setClient(new Client([
-            'base_uri' => $endpointUrl,
-            'headers' => [
-                'Authorization' => "Bearer {$authToken}",
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-                'User-Agent' => Version::getUserAgent(),
-            ],
-        ]));
+        return $this->baseUri . '/' . ltrim($endpointUrl, '/');
     }
 
     /**
-     * @param ClientInterface $client
-     */
-    public function setClient($client)
-    {
-        $this->throwIfNotInstanceOf('\GuzzleHttp\ClientInterface', 'client', $client);
-        $this->client = $client;
-    }
-
-    /**
-     * Send ping request to server
-     * @return \Psr\Http\Message\ResponseInterface
-     * @throws FailedHttpRequestException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    public function ping()
-    {
-        $response = $this->request('GET', self::API_PING_URL);
-        if ($response->getStatusCode() !== 200) {
-            throw new FailedHttpRequestException(sprintf('Failed to send ping HTTP request, error %s', $response->getStatusCode() . ' ' . $response->getReasonPhrase()));
-        }
-        return $response;
-    }
-
-    /**
-     * Send array of data to site monitoring tool
+     * Send HTTP response via curl
      *
-     * Expecting JSON array:
-     * - name
-     * - url
-     * - repo_url
-     * - versions (array)
-     *   - slug
-     *   - version
-     *   - parent
-     *
-     * @param Agent $data
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    public function sendData($data)
-    {
-        $this->throwIfNotInstanceOf(Agent::class, 'data', $data);
-        $response = $this->request('POST', self::API_SEND_DATA_URL, [
-            'body' => $data->toJson()
-        ]);
-
-        if ($response->getStatusCode() !== 200) {
-            throw new FailedHttpRequestException(sprintf('Failed to send sendData HTTP request, error %s', $response->getStatusCode() . ' ' . $response->getReasonPhrase()));
-        }
-
-        return $response;
-    }
-
-    /**
-     * Send array of data to site monitoring tool for deployment
-     *
-     *  Expecting JSON array:
-     *  - author
-     *  - date
-     *  - branch
-     *
-     * @param array $data
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    public function sendDeployment($data)
-    {
-        $this->throwIfNotArray('data', $data);
-        $response = $this->request('POST', self::API_SEND_DEPLOYMENT_URL, [
-            'json' => $data
-        ]);
-
-        if ($response->getStatusCode() !== 200) {
-            throw new FailedHttpRequestException(sprintf('Failed to send sendDeployment HTTP request, error %s', $response->getStatusCode() . ' ' . $response->getReasonPhrase()));
-        }
-
-        return $response;
-    }
-
-    /**
-     * Make HTTP request, allows us to use verbose mode
+     * This creates a new cURL handle per request, which is OK here since we only run one HTTP request at a time
      *
      * @param string $method
-     * @param $uri
-     * @param array $options
-     * @return ResponseInterface
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @param string $endpointUrl
+     * @param ?string $postData Response data to send with request
+     * @return array Response data as an associative array
+     * @throws HttpNetworkException
+     * @throws HttpRequestException
+     * @throws HttpException
      */
-    public function request($method, $uri = '', $options = [])
+    private function sendRequest($method, $endpointUrl, $postData = null)
     {
-        $request = sprintf("%s %s", $method, $uri);
-        echo sprintf("Sending data: %s", $request) . PHP_EOL;
+        if ($method !== 'GET' && $method !== 'POST') {
+            throw new \InvalidArgumentException('Method must be GET or POST');
+        }
+        $url = $this->buildUrl($endpointUrl);
+        $this->handle = curl_init($url);
+        curl_setopt_array($this->handle, $this->curlDefaults);
+        curl_setopt($this->handle, CURLOPT_HTTPHEADER, $this->headers);
 
         // Verbose mode
         if ($this->isVerbose()) {
-            echo $request . PHP_EOL;
-            $json = null;
-            if (!empty($options['json'])) {
-                $json = sprintf("JSON data: %s", $options['json']) . PHP_EOL;
-                unset($options['json']);
-            }
-            if (!empty($options)) {
-                echo "Options:" . PHP_EOL;
-                echo json_encode($options, JSON_PRETTY_PRINT) . PHP_EOL;
-            }
-            if (!empty($json)) {
-                echo $json;
+            echo $url . PHP_EOL;
+            if (!empty($postData)) {
+                echo sprintf("POST data: %s", $postData) . PHP_EOL;
             }
         }
 
-        // Send request
-        try {
-            return $this->client->request($method, $uri, $options);
-        } catch (BadResponseException $e) {
-            $status = $e->getResponse()->getStatusCode();
-            $reason = $e->getResponse()->getReasonPhrase();
-            $body = $e->getResponse()->getBody()->getContents();
-            throw new FailedHttpRequestException(sprintf('Failed HTTP response for %s, HTTP status %d %s, body: %s', $request, $status, $reason, $body));
+        // Set POST request
+        if ($method === 'POST') {
+            curl_setopt($this->handle, CURLOPT_POST, true);
+            curl_setopt($this->handle, CURLOPT_POSTFIELDS, $postData);
         }
+
+        // Send request
+        $response = curl_exec($this->handle);
+
+        // Detect error
+        $errno = curl_errno($this->handle);
+        switch ($errno) {
+            case CURLE_OK:
+                // Request OK
+                break;
+            case CURLE_COULDNT_RESOLVE_PROXY:
+            case CURLE_COULDNT_RESOLVE_HOST:
+            case CURLE_COULDNT_CONNECT:
+            case CURLE_OPERATION_TIMEOUTED:
+            case CURLE_SSL_CONNECT_ERROR:
+                throw new HttpNetworkException(sprintf('HTTP network error failed request to %s: %s', $url, curl_error($this->handle)), $errno);
+            default:
+                throw new HttpRequestException(sprintf('HTTP request error failed request to %s: %s', $url, curl_error($this->handle)), $errno);
+        }
+
+        // Is this a 200 response?
+        $httpStatusCode = (int) $this->getHttpStatusCode();
+        if ($httpStatusCode !== 200) {
+            throw new HttpException(sprintf('HTTP status code %s failed request to %s', $httpStatusCode, $url), $httpStatusCode);
+        }
+
+        // Request OK
+        $body = json_decode($response, true, 512);
+        if (null === $body) {
+            throw new JsonDecodeException('Cannot decode HTTP JSON response');
+        }
+
+        // Return JSON response as an associative array
+        return $body;
     }
+
+    /**
+     * Return HTTP status code of last request
+     * @return string
+     */
+    public function getHttpStatusCode()
+    {
+        return curl_getinfo($this->handle, CURLINFO_HTTP_CODE);
+    }
+
+    /**
+     * Send GET request
+     * @param string $endpointUrl
+     * @return array Decoded JSON response
+     * @throws HttpNetworkException
+     * @throws HttpRequestException
+     */
+    public function get($endpointUrl)
+    {
+        $this->throwIfNotString('endpointUrl', $endpointUrl);
+        return $this->sendRequest('GET', $endpointUrl);
+    }
+
+    /**
+     * Send POST request
+     * @param string $endpointUrl
+     * @param ?string $postData Response data to send with request
+     * @return array Decoded JSON response
+     * @throws HttpNetworkException
+     * @throws HttpRequestException
+     */
+    public function post($endpointUrl, $postData = null)
+    {
+        $this->throwIfNotString('endpointUrl', $endpointUrl);
+        $this->throwIfNotString('postData', $postData);
+        return $this->sendRequest('POST', $endpointUrl, $postData);
+    }
+
 }

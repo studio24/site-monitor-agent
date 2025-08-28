@@ -77,7 +77,7 @@ if ($branch && $author && $date) {
 
     */
 
-    $response = $httpClient->sendDeployment($data);
+    $response = $httpClient->post('deployment', json_encode($data));
 
     echo 'Response: ' . $response->getBody() . PHP_EOL;
 } else {

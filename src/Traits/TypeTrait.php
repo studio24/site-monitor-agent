@@ -20,6 +20,19 @@ trait TypeTrait
     }
 
     /**
+     * Test whether the passed value is not empty
+     * @param $name
+     * @param $value
+     * @return void
+     */
+    public function throwIfEmpty($name, $value)
+    {
+        if (empty($value)) {
+            throw new \InvalidArgumentException(sprintf("$%s cannot be empty", $name));
+        }
+    }
+
+    /**
      *  Test whether the passed value is an array, throw an exception if not
      * @param string $name
      * @param mixed $value

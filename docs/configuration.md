@@ -63,7 +63,7 @@ TODO
 The base URL of the API to send data to. 
 
 ```php
-    'apiBaseUrl'    => 'https://staging-monitor.studio24.net/',
+    'apiBaseUrl'    => 'https://staging-monitor.studio24.net/api/v1/',
 ```
 
 ### apiToken
@@ -130,12 +130,12 @@ Some collectors allow you to pass the base path which defines where this softwar
      ],
 ```
 
-For software using Composer, you can just use the Composer collector.
+For software using Composer, you can use the Composer collector.
 
 ```php
     'collectors'    => [
         new Php(),
-        new Compser(),
+        new Composer(),
      ],
 ```
 
@@ -147,7 +147,7 @@ You can add multiple Composer collectors, if you have Composer installed in sub-
 ```php
     'collectors'    => [
         new Php(),
-        new Compser(),
-        new Compser('web/wp-content/plugins/my-plugin'),
+        new Composer(),
+        new Composer('web/wp-content/plugins/my-plugin'),
      ],
 ```

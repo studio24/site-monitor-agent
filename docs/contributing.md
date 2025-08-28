@@ -26,16 +26,16 @@ You can run individual tests via:
 
 ```bash
 # PHP unit tests
-composer unit
+./vendor/bin/phpunit
 
 # PHP lint
-composer lint
+./bin/tests/lint.sh
 
 # PHP coding standards
-composer cs
+./vendor/bin/phpcs
 
 # Fix coding standards (phpcbf)
-composer fix
+./vendor/bin/phpcbf
 ```
 
 ### PHPUnit-Polyfills

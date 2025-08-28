@@ -2,7 +2,7 @@
 
 namespace Studio24\Agent;
 
-use Studio24\Agent\Exception\FailedTempDirectoryException;
+use Studio24\Agent\Exception\TempDirectoryException;
 
 class TempDirectory
 {
@@ -38,7 +38,7 @@ class TempDirectory
      * Create a temp directory
      * @param $name
      * @return string
-     * @throws FailedTempDirectoryException
+     * @throws TempDirectoryException
      */
     public function getTempDirectory($name)
     {
@@ -48,7 +48,7 @@ class TempDirectory
 
         $fullPath = $this->getFullPath($name);
         if (!mkdir($fullPath, 0777, true)) {
-            throw new FailedTempDirectoryException(sprintf('Cannot create temp directory at %s', $fullPath));
+            throw new TempDirectoryException(sprintf('Cannot create temp directory at %s', $fullPath));
         }
 
         return $fullPath;
